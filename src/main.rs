@@ -42,8 +42,12 @@ fn main() {
             style::{Marker, Point},
             view::ContinuousView,
         };
-        let mut l = Scatter::from_slice(&parse::into_tuple(temp, alt))
-            .style(Style::new().marker(Marker::Circle).colour("#DD3355"));
+        let mut l = Scatter::from_slice(&parse::into_tuple(temp, alt)).style(
+            Style::new()
+                .marker(Marker::Circle)
+                .colour("#DD3355")
+                .size(1u8),
+        );
         let v = ContinuousView::new()
             .add(&l)
             .x_label("Außentemperatur in °C")
