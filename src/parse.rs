@@ -1,10 +1,13 @@
+//! Log parser
+
+/// Parse log file to Log
 pub fn parse_log(log: &str) -> Log {
     // split lines and remove comment line
     let mut lines: Vec<&str> = log.lines().collect();
     lines.remove(0);
 
     // split header and remove header from line list
-    let header: Vec<&str> = lines[0].split(';').collect();
+    let header: Vec<&str> = lines.get(0).unwrap_or(&"").split(';').collect();
     lines.remove(0);
 
     // parse data
@@ -42,7 +45,7 @@ impl<'a> Log<'a> {
         // add values at index to vector
         let mut values = Vec::with_capacity(self.data.len());
         for line in &self.data {
-            values.push(line[index]);
+            values.push(*line.get(index).unwrap_or(&""));
         }
 
         Some(values)
@@ -56,7 +59,16 @@ pub fn into_f64(values: &[&str]) -> Vec<f64> {
 
     // iterate through values and parse
     for &value in values {
-        converted.push(value.parse().unwrap_or(if value == "Y" { 1. } else { 0. }))
+        converted.push(value.parse().unwrap_or(if value == "Y" {
+            1.
+        } else if value.contains(':') {
+            let hms: Vec<&str> = value.split(':').collect();
+            hms.get(2).unwrap_or(&"0").parse().unwrap_or(0.) / 60.
+                + hms.get(1).unwrap_or(&"0").parse().unwrap_or(0.)
+                + hms.get(0).unwrap_or(&"0").parse().unwrap_or(0.) * 60.
+        } else {
+            0.
+        }))
     }
 
     converted

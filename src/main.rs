@@ -53,13 +53,20 @@ fn main() {
 
     // read log file
     let mut file = String::new();
-    File::open(path).unwrap().read_to_string(&mut file).unwrap();
+    File::open(path)
+        .expect("Log-Datei konnte nicht geöffnet werden")
+        .read_to_string(&mut file)
+        .expect("Log-Datei konnte nicht gelesen werden");
 
     // parse log file
     let log = parse::parse_log(&file);
-    let x_values = log.at_key(x_axis).unwrap();
+    let x_values = log
+        .at_key(x_axis)
+        .expect("Die Werte der x-Achse sind fehlerhaft");
     let x_values = parse::into_f64(&x_values);
-    let y_values = log.at_key(y_axis).unwrap();
+    let y_values = log
+        .at_key(y_axis)
+        .expect("Die Werte der y-Achse sind fehlerhaft");
     let y_values = parse::into_f64(&y_values);
 
     // create scatter
@@ -88,6 +95,8 @@ fn main() {
     }
 
     // save output file
-    Page::single(&view).save(output).unwrap();
+    Page::single(&view)
+        .save(output)
+        .expect("Die Analyse konnte nicht abgespeichert werden");
     println!("Analyse gespeichert: {}", output);
 }

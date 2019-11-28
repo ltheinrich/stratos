@@ -1,21 +1,20 @@
 ![Build Status](https://github.com/ltheinrich/stratos/workflows/Rust/badge.svg)
 
 # Stratos
-Stratosphere balloon
+### Stratosphärenflug Log-Analyse
+Stratos analysiert den Log vom Stratosphärenflug.
+Dabei werden ganze und Dezimalzahlen unterstützt. Zeitangaben (hh:mm:ss) werden in Minuten umgerechnet.
 
-## What is Stratos?
-Stratos is a software to analyze the data of a stratosphere balloon project.
-
-It is a school project, so expect some German texts within this repository.
-
-## Building from source
-Requirements
+## Kompilieren
+Anforderungen
  - Git
  - Rust
  - Cargo
 
-Clone from Git
+Git-Repository klonen
 > git clone https://github.com/ltheinrich/stratos && cd stratos
 
-Build using Cargo
+Mit Cargo kompilieren
 > cargo build --release
+
+Die ausführbare Datei befindet sich unter `target/release/stratos`
