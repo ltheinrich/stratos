@@ -1,5 +1,8 @@
 //! Log parser
 
+use crate::XY;
+use kern::Error;
+
 /// Parse log file to Log
 pub fn parse_log(log: &str) -> Log {
     // split lines and remove comment line
@@ -30,7 +33,7 @@ pub struct Log<'a> {
 
 impl<'a> Log<'a> {
     /// Get values for specific header key
-    pub fn at_key(&self, key: &str) -> Option<Vec<&'a str>> {
+    pub fn at_key(&self, key: &str) -> Result<Vec<&'a str>, Error> {
         // determine index of key
         let mut index = 0;
         for (i, &header_key) in self.header.iter().enumerate() {
@@ -38,7 +41,7 @@ impl<'a> Log<'a> {
                 index = i;
                 break;
             } else if i + 1 == self.header.len() {
-                return None;
+                return Error::from(format!("Werte für {} existieren im Log nicht", key));
             }
         }
 
@@ -48,7 +51,7 @@ impl<'a> Log<'a> {
             values.push(*line.get(index).unwrap_or(&""));
         }
 
-        Some(values)
+        Ok(values)
     }
 }
 
@@ -74,8 +77,8 @@ pub fn into_f64(values: &[&str]) -> Vec<f64> {
     converted
 }
 
-/// Put seperate vectors into a vector of tuples
-pub fn into_tuple(values1: Vec<f64>, values2: Vec<f64>) -> Vec<(f64, f64)> {
+/// Put seperate vectors into a vector of XY
+pub fn into_xy(values1: Vec<f64>, values2: Vec<f64>) -> Vec<XY> {
     // initialize vector and add items of first vector
     let mut tuples = Vec::with_capacity(values1.len());
     for value1 in values1 {
@@ -83,8 +86,8 @@ pub fn into_tuple(values1: Vec<f64>, values2: Vec<f64>) -> Vec<(f64, f64)> {
     }
 
     // iterate through second vector and replace values
-    for (index, &value2) in values2.iter().enumerate() {
-        if let Some(tuple) = tuples.get_mut(index) {
+    for (i, &value2) in values2.iter().enumerate() {
+        if let Some(tuple) = tuples.get_mut(i) {
             tuple.1 = value2;
         }
     }
