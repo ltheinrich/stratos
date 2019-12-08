@@ -10,7 +10,6 @@ mod meta;
 
 pub use crate::meta::*;
 
-use kern::Error;
 use plotlib::{
     page::Page,
     scatter::{Scatter, Style},
