@@ -4,11 +4,12 @@ extern crate kern;
 extern crate plotlib;
 
 pub mod analyze;
+pub mod http;
 pub mod parse;
 
 mod meta;
 
-pub use crate::meta::*;
+pub use crate::meta::{init_version, version};
 
 use plotlib::{
     page::Page,
@@ -86,12 +87,12 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
     // create view
     let mut view = ContinuousView::new()
         .x_label(if let Some(x_name) = params.x_name {
-            x_name.to_string()
+            (*x_name).to_string()
         } else {
             params.x_axis.to_string()
         })
         .y_label(if let Some(y_name) = params.y_name {
-            y_name.to_string()
+            (*y_name).to_string()
         } else {
             params.y_axis.to_string()
         });
@@ -141,7 +142,7 @@ fn new_scatter(values: &[XY], colour: Option<&&str>, size: Option<&&str>) -> Sca
     Scatter::from_slice(values).style(
         &Style::new()
             .colour(if let Some(colour) = colour {
-                colour.to_string()
+                (*colour).to_string()
             } else {
                 String::from("#DD3355")
             })

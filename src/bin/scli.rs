@@ -25,7 +25,7 @@ const HELP: &str = "Benutzung: stratos LOG-DATEI [OPTIONEN]\nString S, Float F, 
 
 fn main() {
     // init
-    version();
+    init_version();
     let args: Vec<String> = env::args().collect();
     if args.is_empty() {
         println!("{}", HELP);
