@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#cargo clean
+cargo clean
 mkdir -p target/bin
 
 cross build --release --target x86_64-unknown-linux-musl
