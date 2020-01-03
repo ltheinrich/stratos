@@ -17,4 +17,4 @@ Git-Repository klonen
 Mit Cargo kompilieren
 > cargo build --release
 
-Die ausführbare Datei befindet sich unter `target/release/stratos`
+Die ausführbaren Dateien (scli und sws) befindet sich unter `target/release/`
