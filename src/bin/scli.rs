@@ -8,7 +8,7 @@ use std::{
 };
 use stratos::*;
 
-const HELP: &str = "Benutzung: stratos LOG-DATEI [OPTIONEN]\nString S, Float F, Integer I, Erforderlich *\n\nOptionen:
+const HELP: &str = "Benutzung: scli LOG-DATEI [OPTIONEN]\nString S, Float F, Integer I, Erforderlich *\n\nOptionen:
 * --x    S       x-Achse
 * --y    S       y-Achse
   --o    S       Ausgabe-Datei

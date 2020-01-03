@@ -25,7 +25,12 @@ pub struct HttpRequest<'a> {
 
 // HTTP request implementation
 impl<'a> HttpRequest<'a> {
-    pub fn from(raw_header: &'a str, mut raw_body: Vec<u8>, stream: &mut TcpStream) -> Self {
+    pub fn from(
+        raw_header: &'a str,
+        mut raw_body: Vec<u8>,
+        stream: &mut TcpStream,
+        max_content: usize,
+    ) -> Self {
         let mut header = raw_header.lines();
         // parse method and url
         let mut reqln = header.next().unwrap().split(' ');
@@ -60,24 +65,24 @@ impl<'a> HttpRequest<'a> {
         stream
             .set_read_timeout(Some(std::time::Duration::from_millis(2000)))
             .unwrap();
-        if let Some(buf_len) = headers.get("Content-Length") {
+        let buf_len = if let Some(buf_len) = headers.get("Content-Length") {
+            Some(buf_len)
+        } else {
+            headers.get("content-length")
+        };
+        if let Some(buf_len) = buf_len {
             let con_len = buf_len.parse::<usize>().unwrap();
-            while raw_body.len() < con_len {
-                let mut rest_body = vec![0u8; 65536];
-                let length = stream.r(&mut rest_body).unwrap();
-                rest_body.truncate(length);
-                raw_body.append(&mut rest_body);
+            if con_len > max_content {
+                body = String::from("Maximale Log-Größe überschritten");
+            } else {
+                while raw_body.len() < con_len {
+                    let mut rest_body = vec![0u8; 65536];
+                    let length = stream.r(&mut rest_body).unwrap();
+                    rest_body.truncate(length);
+                    raw_body.append(&mut rest_body);
+                }
+                body = String::from_utf8(raw_body).unwrap();
             }
-            body = String::from_utf8(raw_body).unwrap();
-        } else if let Some(buf_len) = headers.get("content-length") {
-            let con_len = buf_len.parse::<usize>().unwrap();
-            while raw_body.len() < con_len {
-                let mut rest_body = vec![0u8; 65536];
-                let length = stream.r(&mut rest_body).unwrap();
-                rest_body.truncate(length);
-                raw_body.append(&mut rest_body);
-            }
-            body = String::from_utf8(raw_body).unwrap();
         }
 
         // parse GET parameters and return
@@ -167,13 +172,23 @@ fn parse_parameters(raw: &str) -> BTreeMap<&str, &str> {
 }
 
 /// HTTP responder
-pub fn respond(stream: &mut TcpStream, content: &[u8], content_type: &str) -> io::Result<()> {
+pub fn respond(
+    stream: &mut TcpStream,
+    content: &[u8],
+    content_type: &str,
+    filename: Option<&str>,
+) -> io::Result<()> {
     stream
         .wa(format!(
-            "HTTP/1.1 200 OK\r\nServer: ltheinrich.de stratos/{}\r\nContent-Type: {}\r\nContent-Length: {}\r\n\r\n",
+            "HTTP/1.1 200 OK\r\nServer: ltheinrich.de stratos/{}\r\nContent-Type: {}\r\nContent-Length: {}{}\r\n\r\n",
             version(),
             content_type,
-            content.len()
+            content.len(),
+            if let Some(filename) = filename {
+                format!("\r\nContent-Disposition: attachment; filename=\"{}\"", filename)
+            } else {
+                String::new()
+            }
         )
         .as_bytes())?;
     stream.wa(content)?;
