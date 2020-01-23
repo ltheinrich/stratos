@@ -49,7 +49,7 @@ fn main() {
         .expect("Das TCP-Server konnte nicht an der angegebenen Adresse bzw. Port starten");
     let listener = Arc::new(RwLock::new(listener));
     println!("Der Server läuft unter  {}:{}", addr, port);
-    (0..10).for_each(|_| {
+    (0..3).for_each(|_| {
         let listener = listener.clone();
         thread::spawn(move || accept_connections(listener, log, size));
     });
