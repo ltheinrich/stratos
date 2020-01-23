@@ -6,6 +6,7 @@ use kern::net::Stream;
 use kern::Error;
 use std::env;
 use std::net::{TcpListener, TcpStream};
+use std::sync::{Arc, RwLock};
 use std::thread;
 use stratos::*;
 
@@ -14,6 +15,9 @@ const HEAD: &str = include_str!("../../web/head.html");
 const END: &str = "</body></html>";
 const BOOTSTRAP: &[u8] = include_bytes!("../../web/bootstrap.min.css");
 const BOOTSTRAP_MAP: &[u8] = include_bytes!("../../web/bootstrap.min.css.map");
+const FAVICON_ICO: &[u8] = include_bytes!("../../web/favicon.ico");
+const FAVICON_PNG: &[u8] = include_bytes!("../../web/favicon.png");
+const APPLE_TOUCH_ICON: &[u8] = include_bytes!("../../web/apple-touch-icon.png");
 const HELP: &str = "Benutzung: sws [OPTIONEN]\nString S, Integer I, Boolean B\n\nOptionen:
   --port    I       Port (3490)
   --addr    S       IP-Adresse ([::])
@@ -43,21 +47,33 @@ fn main() {
     // start server
     let listener = TcpListener::bind(format!("{}:{}", addr, port))
         .expect("Das TCP-Server konnte nicht an der angegebenen Adresse bzw. Port starten");
+    let listener = Arc::new(RwLock::new(listener));
     println!("Der Server läuft unter  {}:{}", addr, port);
+    (0..10).for_each(|_| {
+        let listener = listener.clone();
+        thread::spawn(move || accept_connections(listener, log, size));
+    });
+    thread::spawn(move || accept_connections(listener, log, size))
+        .join()
+        .unwrap();
+}
+
+// Accept connections
+fn accept_connections(listener: Arc<RwLock<TcpListener>>, log: bool, size: usize) {
     loop {
-        if let Ok((stream, addr)) = listener.accept() {
+        if let Ok((stream, addr)) = listener.read().unwrap().accept() {
             thread::spawn(move || {
                 if log {
                     println!("Log: Anfrage von {}", addr.ip());
                 }
-                handle(stream, size);
+                handle_connection(stream, size);
             });
         }
     }
 }
 
 // Handle connection
-fn handle(mut stream: TcpStream, max_content: usize) {
+fn handle_connection(mut stream: TcpStream, max_content: usize) {
     if let Ok((header, rest)) = read_header(&mut stream) {
         let http_request = match HttpRequest::from(&header, rest, &mut stream, max_content) {
             Some(http_request) => http_request,
@@ -178,12 +194,19 @@ fn handle(mut stream: TcpStream, max_content: usize) {
                 Some("analysis.svg"),
             )
             .unwrap();
-        } else if http_request.url() == "/bootstrap.min.css" {
-            respond(&mut stream, BOOTSTRAP, "text/css", None).unwrap();
-        } else if http_request.url() == "/bootstrap.min.css.map" {
-            respond(&mut stream, BOOTSTRAP_MAP, "text/css", None).unwrap();
         } else {
-            respond(&mut stream, PAGE, "text/html", None).unwrap();
+            match &http_request.url()[1..] {
+                "bootstrap.min.css" => respond(&mut stream, BOOTSTRAP, "text/css", None).unwrap(),
+                "bootstrap.min.css.map" => {
+                    respond(&mut stream, BOOTSTRAP_MAP, "text/css", None).unwrap()
+                }
+                "favicon.ico" => respond(&mut stream, FAVICON_ICO, "image/x-icon", None).unwrap(),
+                "favicon.png" => respond(&mut stream, FAVICON_PNG, "image/png", None).unwrap(),
+                "apple-touch-icon.png" => {
+                    respond(&mut stream, APPLE_TOUCH_ICON, "image/png", None).unwrap()
+                }
+                _ => respond(&mut stream, PAGE, "text/html", None).unwrap(),
+            }
         }
     }
 }
