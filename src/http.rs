@@ -30,11 +30,11 @@ impl<'a> HttpRequest<'a> {
         mut raw_body: Vec<u8>,
         stream: &mut TcpStream,
         max_content: usize,
-    ) -> Self {
+    ) -> Option<Self> {
         let mut header = raw_header.lines();
         // parse method and url
-        let mut reqln = header.next().unwrap().split(' ');
-        let method = if reqln.next().unwrap() == "POST" {
+        let mut reqln = header.next()?.split(' ');
+        let method = if reqln.next()? == "POST" {
             HttpMethod::POST
         } else {
             HttpMethod::GET
@@ -42,7 +42,7 @@ impl<'a> HttpRequest<'a> {
         let mut get_raw = "";
         let url = if let Some(full_url) = reqln.next() {
             let mut split_url = full_url.splitn(2, '?');
-            let url = split_url.next().unwrap();
+            let url = split_url.next()?;
             if let Some(params) = split_url.next() {
                 get_raw = params;
             }
@@ -54,9 +54,8 @@ impl<'a> HttpRequest<'a> {
         let mut headers = BTreeMap::new();
         header.for_each(|hl| {
             let mut hls = hl.splitn(2, ':');
-            let key = hls.next().unwrap().trim();
-            if let Some(value) = hls.next() {
-                headers.insert(key, value.trim());
+            if let (Some(key), Some(value)) = (hls.next(), hls.next()) {
+                headers.insert(key.trim(), value.trim());
             }
         });
 
@@ -64,44 +63,44 @@ impl<'a> HttpRequest<'a> {
         let mut body = String::new();
         stream
             .set_read_timeout(Some(std::time::Duration::from_millis(2000)))
-            .unwrap();
+            .ok()?;
         let buf_len = if let Some(buf_len) = headers.get("Content-Length") {
             Some(buf_len)
         } else {
             headers.get("content-length")
         };
         if let Some(buf_len) = buf_len {
-            let con_len = buf_len.parse::<usize>().unwrap();
+            let con_len = buf_len.parse::<usize>().ok()?;
             if con_len > max_content {
                 body = String::from("Maximale Log-Größe überschritten");
             } else {
                 while raw_body.len() < con_len {
                     let mut rest_body = vec![0u8; 65536];
-                    let length = stream.r(&mut rest_body).unwrap();
+                    let length = stream.r(&mut rest_body).ok()?;
                     rest_body.truncate(length);
                     raw_body.append(&mut rest_body);
                 }
-                body = String::from_utf8(raw_body).unwrap();
+                body = String::from_utf8(raw_body).ok()?;
             }
         }
 
         // parse GET parameters and return
-        let get = parse_parameters(get_raw);
-        Self {
+        let get = parse_parameters(get_raw)?;
+        Some(Self {
             method,
             url,
             headers,
             get,
             body,
-        }
+        })
     }
 
     /// Parse POST parameters
-    pub fn post(&self) -> BTreeMap<&str, &str> {
+    pub fn post(&self) -> Option<BTreeMap<&str, &str>> {
         if self.method == HttpMethod::POST {
             parse_upload(&self.body)
         } else {
-            BTreeMap::new()
+            Some(BTreeMap::new())
         }
     }
 
@@ -127,48 +126,50 @@ impl<'a> HttpRequest<'a> {
 }
 
 // Parse POST file upload with parameters to map
-fn parse_upload(body: &str) -> BTreeMap<&str, &str> {
+fn parse_upload(body: &str) -> Option<BTreeMap<&str, &str>> {
     let mut params = BTreeMap::new();
-    body.split("\r\n---").for_each(|content| {
+
+    for content in body.split("\r\n---") {
         let mut lines = content.splitn(4, "\r\n").skip(1);
         let mut name = "";
-        lines
-            .next()
-            .unwrap()
-            .split(';')
-            .map(|line| line.trim())
-            .for_each(|line| {
-                if line.starts_with("name=") {
+        for line in lines.next()?.split(';').map(|line| line.trim()) {
+            if line.starts_with("name=") {
+                if line.len() > 6 {
                     name = &line[6..(line.len() - 1)];
+                    break;
+                } else {
+                    return None;
                 }
-            });
-        if let Some(value) = lines.next() {
-            if value == "" {
-                params.insert(name, lines.next().unwrap());
-            } else {
-                let mut a = lines.next().unwrap().splitn(2, "\r\n");
-                params.insert(name, a.nth(1).unwrap());
             }
         }
-    });
-    params
+        if let Some(value) = lines.next() {
+            if value == "" {
+                params.insert(name, lines.next()?);
+            } else {
+                let mut a = lines.next()?.splitn(2, "\r\n");
+                params.insert(name, a.nth(1)?);
+            }
+        }
+    }
+
+    Some(params)
 }
 
 // Parse GET parameters to map
-fn parse_parameters(raw: &str) -> BTreeMap<&str, &str> {
+fn parse_parameters(raw: &str) -> Option<BTreeMap<&str, &str>> {
     let mut params = BTreeMap::new();
-    raw.split('&').for_each(|p| {
+    for p in raw.split('&') {
         let mut ps = p.splitn(2, '=');
         params.insert(
-            ps.next().unwrap().trim(),
+            ps.next()?.trim(),
             if let Some(value) = ps.next() {
                 value.trim()
             } else {
                 ""
             },
         );
-    });
-    params
+    }
+    Some(params)
 }
 
 /// HTTP responder

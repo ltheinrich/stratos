@@ -9,7 +9,11 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use stratos::*;
 
-const PAGE: &[u8] = include_bytes!("../../web.html");
+const PAGE: &[u8] = include_bytes!("../../web/index.html");
+const HEAD: &str = include_str!("../../web/head.html");
+const END: &str = "</body></html>";
+const BOOTSTRAP: &[u8] = include_bytes!("../../web/bootstrap.min.css");
+const BOOTSTRAP_MAP: &[u8] = include_bytes!("../../web/bootstrap.min.css.map");
 const HELP: &str = "Benutzung: sws [OPTIONEN]\nString S, Integer I, Boolean B\n\nOptionen:
   --port    I       Port (3490)
   --addr    S       IP-Adresse ([::])
@@ -55,15 +59,46 @@ fn main() {
 // Handle connection
 fn handle(mut stream: TcpStream, max_content: usize) {
     if let Ok((header, rest)) = read_header(&mut stream) {
-        let http_request = HttpRequest::from(&header, rest, &mut stream, max_content);
+        let http_request = match HttpRequest::from(&header, rest, &mut stream, max_content) {
+            Some(http_request) => http_request,
+            None => {
+                return respond(
+                    &mut stream,
+                    format!(
+                        "{}<div class=\"alert alert-danger\" role=\"alert\">Die HTTP-Anfrage konnte nicht gelesen werden</div>{}",
+                        HEAD, END
+                    )
+                    .as_bytes(),
+                    "text/html",
+                    None,
+                )
+                .unwrap()
+            }
+        };
         if http_request.method() == &HttpMethod::POST {
-            let post_params = http_request.post();
+            let post_params = match http_request.post() {
+                Some(post_params) => post_params,
+                None => {
+                    return respond(
+                        &mut stream,
+                        format!(
+                            "{}<div class=\"alert alert-danger\" role=\"alert\">Die POST-Anfrage konnte nicht gelesen werden</div><br><p>Möglicherweise hast du keine Log-Datei ausgewählt oder dein Browser wird nicht unterstützt (nutze in diesem Fall Firefox)</p>{}",
+                            HEAD, END
+                        )
+                        .as_bytes(),
+                        "text/html",
+                        None,
+                    )
+                    .unwrap()
+                }
+            };
             let file = match post_params.get("file") {
                 Some(file) => file,
                 None => {
                     return respond(
                         &mut stream,
-                        b"Bitte suche eine Log-Datei aus",
+                        format!("{}<div class=\"alert alert-danger\" role=\"alert\">Bitte suche eine Log-Datei aus</div>{}", HEAD, END)
+                            .as_bytes(),
                         "text/html",
                         None,
                     )
@@ -75,7 +110,11 @@ fn handle(mut stream: TcpStream, max_content: usize) {
                 None => {
                     return respond(
                         &mut stream,
-                        b"Die Angabe der x-Achse ist erforderlich",
+                        format!(
+                            "{}<div class=\"alert alert-danger\" role=\"alert\">Die Angabe der x-Achse ist erforderlich</div>{}",
+                            HEAD, END
+                        )
+                        .as_bytes(),
                         "text/html",
                         None,
                     )
@@ -87,7 +126,11 @@ fn handle(mut stream: TcpStream, max_content: usize) {
                 None => {
                     return respond(
                         &mut stream,
-                        b"Die Angabe der x-Achse ist erforderlich",
+                        format!(
+                            "{}<div class=\"alert alert-danger\" role=\"alert\">Die Angabe der y-Achse ist erforderlich</div>{}",
+                            HEAD, END
+                        )
+                        .as_bytes(),
                         "text/html",
                         None,
                     )
@@ -113,8 +156,19 @@ fn handle(mut stream: TcpStream, max_content: usize) {
             ) {
                 Ok(analysis) => analysis,
                 Err(err) => {
-                    return respond(&mut stream, err.to_string().as_bytes(), "text/html", None)
-                        .unwrap()
+                    return respond(
+                        &mut stream,
+                        format!(
+                            "{}<div class=\"alert alert-danger\" role=\"alert\">{}</div>{}",
+                            HEAD,
+                            err.to_string(),
+                            END
+                        )
+                        .as_bytes(),
+                        "text/html",
+                        None,
+                    )
+                    .unwrap()
                 }
             };
             respond(
@@ -124,6 +178,10 @@ fn handle(mut stream: TcpStream, max_content: usize) {
                 Some("analysis.svg"),
             )
             .unwrap();
+        } else if http_request.url() == "/bootstrap.min.css" {
+            respond(&mut stream, BOOTSTRAP, "text/css", None).unwrap();
+        } else if http_request.url() == "/bootstrap.min.css.map" {
+            respond(&mut stream, BOOTSTRAP_MAP, "text/css", None).unwrap();
         } else {
             respond(&mut stream, PAGE, "text/html", None).unwrap();
         }

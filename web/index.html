@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stratos Log-Analyse</title>
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <style>
+        input {
+            font-size: 15px;
+            margin: 5px auto;
+        }
+
+        .custom-card {
+            margin: 5%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card bg-light custom-card">
+        <h5 class="card-header">
+            Stratos Log-Analyse
+        </h5>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                <label>x-Achse (erforderlich): <input name="x" type="text" placeholder="x-Achse" required></label><br>
+                <label>y-Achse (erforderlich): <input name="y" type="text" placeholder="y-Achse" required></label><br>
+                <label>Punkt-Größe: <input name="s" type="number" placeholder="Punkt-Größe"></label><br>
+                <label>Höhe im Log (Aufstieg-Farbe Standard, Abstieg-Farbe --cf): <input name="h" type="text"
+                        placeholder="Höhe im Log (Aufstieg-Farbe Standard, Abstieg-Farbe --cf)"></label><br>
+                <label>HTML-Farbcode: <input name="c" type="text" placeholder="HTML-Farbcode"></label><br>
+                <label>HTML-Farbcode für den Abstieg (benötigt --h): <input name="cf" type="text"
+                        placeholder="HTML-Farbcode für den Abstieg (benötigt --h)"></label><br>
+                <label>x-Achsen-Name: <input name="xn" type="text" placeholder="x-Achsen-Name"></label><br>
+                <label>y-Achsen-Name: <input name="yn" type="text" placeholder="y-Achsen-Name"></label><br>
+                <label>Minimum x-Bereich: <input name="xmin" type="number" placeholder="Minimum x-Bereich"></label><br>
+                <label>Maximum x-Bereich: <input name="xmax" type="number" placeholder="Maximum x-Bereich"></label><br>
+                <label>Minimum y-Bereich: <input name="ymin" type="number" placeholder="Minimum y-Bereich"></label><br>
+                <label>Maximum y-Bereich: <input name="ymax" type="number" placeholder="Maximum y-Bereich"></label><br>
+                <label>Log-Datei (erforderlich): <input name="file" type="file" required></label>
+                <button type="button" class="btn btn-outline-secondary">Log Analysieren</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
