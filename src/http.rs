@@ -2,6 +2,7 @@
 
 use crate::version;
 use kern::net::Stream;
+use kern::Error;
 use std::collections::BTreeMap;
 use std::io;
 use std::net::TcpStream;
@@ -31,8 +32,8 @@ impl<'a> HttpRequest<'a> {
         stream: &mut TcpStream,
         max_content: usize,
     ) -> Option<Self> {
-        let mut header = raw_header.lines();
         // parse method and url
+        let mut header = raw_header.lines();
         let mut reqln = header.next()?.split(' ');
         let method = if reqln.next()? == "POST" {
             HttpMethod::POST
@@ -50,6 +51,7 @@ impl<'a> HttpRequest<'a> {
         } else {
             "/"
         };
+
         // parse headers
         let mut headers = BTreeMap::new();
         header.for_each(|hl| {
@@ -69,6 +71,8 @@ impl<'a> HttpRequest<'a> {
         } else {
             headers.get("content-length")
         };
+
+        // check max log size
         if let Some(buf_len) = buf_len {
             let con_len = buf_len.parse::<usize>().ok()?;
             if con_len > max_content {
@@ -114,10 +118,12 @@ impl<'a> HttpRequest<'a> {
         self.url
     }
 
+    /* unused
     /// Get headers map
     pub fn headers(&self) -> &BTreeMap<&str, &str> {
         &self.headers
     }
+    */
 
     /// Get GET parameters
     pub fn get(&self) -> &BTreeMap<&str, &str> {
@@ -193,6 +199,67 @@ pub fn respond(
         )
         .as_bytes())?;
     stream.wa(content)?;
-    stream.wa(b"\r\n")?;
-    Ok(())
+    stream.wa(b"\r\n")
+}
+
+/// HTTP redirecter
+pub fn redirect(stream: &mut TcpStream, url: &str) -> io::Result<()> {
+    stream.wa(format!(
+        "HTTP/1.1 303 See Other\r\nServer: ltheinrich.de stratos/{}\r\nLocation: {1}\r\n\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1><p><a href=\"{1}\">{1}</a></p></body></html>\r\n",
+        version(),
+        url
+    )
+    .as_bytes())
+}
+
+/// Read until \r\n\r\n
+pub fn read_header(stream: &mut TcpStream) -> Result<(String, Vec<u8>), Error> {
+    let mut header = Vec::new();
+    let mut rest = Vec::new();
+    let mut buf = vec![0u8; 8192];
+    'l: loop {
+        let length = match stream.r(&mut buf) {
+            Ok(length) => length,
+            Err(err) => return Error::from(err),
+        };
+        for (i, &c) in buf.iter().enumerate() {
+            if c == b'\r' {
+                if buf.len() < i + 4 {
+                    let mut buf_temp = vec![0u8; buf.len() - (i + 4)];
+                    match stream.r(&mut buf_temp) {
+                        Ok(_) => {}
+                        Err(err) => return Error::from(err),
+                    };
+                    let buf2 = [&buf[..], &buf_temp[..]].concat();
+                    if buf2[i + 1] == b'\n' && buf2[i + 2] == b'\r' && buf2[i + 3] == b'\n' {
+                        header.append(&mut buf);
+                        header.append(&mut buf_temp);
+                        break 'l;
+                    }
+                } else if buf[i + 1] == b'\n' && buf[i + 2] == b'\r' && buf[i + 3] == b'\n' {
+                    for &b in buf.iter().take(i + 4) {
+                        header.push(b);
+                    }
+                    for &b in buf.iter().take(length).skip(i + 4) {
+                        rest.push(b);
+                    }
+                    break 'l;
+                } else if i + 1 == buf.len() {
+                    for &b in buf.iter().take(i + 4) {
+                        header.push(b);
+                    }
+                    for &b in buf.iter().take(length).skip(i + 4) {
+                        rest.push(b);
+                    }
+                }
+            }
+        }
+    }
+    Ok((
+        match String::from_utf8(header) {
+            Ok(header) => header,
+            Err(err) => return Error::from(err),
+        },
+        rest,
+    ))
 }
