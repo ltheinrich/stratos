@@ -1,0 +1,4 @@
+#!/bin/sh
+
+systemctl enable stratos
+systemctl start stratos

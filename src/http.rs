@@ -1,6 +1,6 @@
 //! HTTP parsing
 
-use crate::version;
+use crate::{common::*, version};
 use kern::net::Stream;
 use kern::Error;
 use std::collections::BTreeMap;
@@ -76,7 +76,14 @@ impl<'a> HttpRequest<'a> {
         if let Some(buf_len) = buf_len {
             let con_len = buf_len.parse::<usize>().ok()?;
             if con_len > max_content {
-                body = String::from("Maximale Log-Größe überschritten");
+                respond(stream, format!(
+                    "{}{}<div class=\"alert alert-danger\" role=\"alert\">Maximale Log-Größe überschritten</div>{}",
+                    HEAD, BACK, footer()
+                )
+                .as_bytes(),
+                "text/html",
+                None).unwrap();
+                return None;
             } else {
                 while raw_body.len() < con_len {
                     let mut rest_body = vec![0u8; 65536];

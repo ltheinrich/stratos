@@ -1,0 +1,4 @@
+#!/bin/sh
+
+systemctl stop stratos
+systemctl disable stratos

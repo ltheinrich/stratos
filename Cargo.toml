@@ -15,3 +15,15 @@ plotlib = "0.4.0"
 [profile.release]
 lto = true
 codegen-units = 1
+
+[package.metadata.deb]
+depends = "rustc, cargo"
+priority = "optional"
+maintainer-scripts = "deb/"
+assets = [
+    ["target/release/stratos", "usr/bin/", "755"],
+    ["deb/stratos.conf", "etc/stratos.conf", "644"],
+    ["deb/stratos.service", "etc/systemd/system/stratos.service", "644"],
+    ["README.md", "usr/share/doc/cargo-deb/README", "644"],
+]
+extended-description = "Stratos analyzes the log file of stratosphere balloon flights"
