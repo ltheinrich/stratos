@@ -19,6 +19,7 @@ codegen-units = 1
 [package.metadata.deb]
 depends = "rustc, cargo"
 priority = "optional"
+section = "science"
 maintainer-scripts = "deb/"
 assets = [
     ["target/release/stratos", "usr/bin/", "755"],
