@@ -3,11 +3,30 @@
 use crate::XY;
 
 /// Split xy-tuple into seperate vectors (rise, fall)
-pub fn split_up<'a>(values: &'a [XY], height: &[f64]) -> (&'a [XY], &'a [XY]) {
+pub fn split_up(values: Vec<XY>, highest: usize) -> (Vec<XY>, Vec<XY>) {
+    // check if empty vector
     if values.is_empty() {
-        return (&[], &[]);
+        return (vec![], vec![]);
     }
-    values.split_at(highest(height).0)
+
+    // split into rise and fall
+    let mut fall = Vec::new();
+    let rise: Vec<XY> = values
+        .into_iter()
+        .enumerate()
+        .filter(|(i, v)| {
+            if i > &highest {
+                fall.push(*v);
+                false
+            } else {
+                true
+            }
+        })
+        .map(|(_, v)| v)
+        .collect();
+
+    // return vectors
+    (rise, fall)
 }
 
 /// Get highest value in list
@@ -91,130 +110,91 @@ pub fn set_range(
     x_max: Option<&&str>,
     y_min: Option<&&str>,
     y_max: Option<&&str>,
-    height: &mut Option<Vec<f64>>,
 ) -> Vec<XY> {
-    let mut removed = Vec::new();
-
     // set x-min
     if let Some(x_min) = x_min {
         if let Ok(x_min) = x_min.parse() {
-            let (temp_values, mut temp_removed) = remove_lower_x(values, x_min);
-            values = temp_values;
-            removed.append(&mut temp_removed);
+            values = remove_lower_x(values, x_min);
         }
     }
 
     // set x-max
     if let Some(x_max) = x_max {
         if let Ok(x_max) = x_max.parse() {
-            let (temp_values, mut temp_removed) = remove_higher_x(values, x_max);
-            values = temp_values;
-            removed.append(&mut temp_removed);
+            values = remove_higher_x(values, x_max);
         }
     }
 
     // set y-min
     if let Some(y_min) = y_min {
         if let Ok(y_min) = y_min.parse() {
-            let (temp_values, mut temp_removed) = remove_lower_y(values, y_min);
-            values = temp_values;
-            removed.append(&mut temp_removed);
+            values = remove_lower_y(values, y_min);
         }
     }
 
     // set y-max
     if let Some(y_max) = y_max {
         if let Ok(y_max) = y_max.parse() {
-            let (temp_values, mut temp_removed) = remove_higher_y(values, y_max);
-            values = temp_values;
-            removed.append(&mut temp_removed);
+            values = remove_higher_y(values, y_max);
         }
     }
 
-    // remove values from height
-    if let Some(temp_height) = height {
-        removed.sort();
-        removed.dedup();
-        removed.iter().enumerate().for_each(|(i, ri)| {
-            temp_height.remove(ri - i);
-        });
-    }
-
+    // return values
     values
 }
 
 /// Remove higher values (x) from XY
-/// Returns XY-list and removed indexes
-pub fn remove_higher_x(mut values: Vec<XY>, highest: f64) -> (Vec<XY>, Vec<usize>) {
-    let mut removed = Vec::new();
-    values = values
+/// Returns XY-list
+pub fn remove_higher_x(values: Vec<XY>, highest: f64) -> Vec<XY> {
+    values
         .into_iter()
-        .enumerate()
-        .filter(|(i, v)| {
+        .filter(|v| {
             if v.0 <= highest {
-                removed.push(*i);
                 return true;
             }
             false
         })
-        .map(|(_, v)| v)
-        .collect();
-    (values, removed)
+        .collect()
 }
 
 /// Remove lower values (x) from XY
-/// Returns XY-list and removed indexes
-pub fn remove_lower_x(mut values: Vec<XY>, lowest: f64) -> (Vec<XY>, Vec<usize>) {
-    let mut removed = Vec::new();
-    values = values
+/// Returns XY-list
+pub fn remove_lower_x(values: Vec<XY>, lowest: f64) -> Vec<XY> {
+    values
         .into_iter()
-        .enumerate()
-        .filter(|(i, v)| {
+        .filter(|v| {
             if v.0 >= lowest {
-                removed.push(*i);
                 return true;
             }
             false
         })
-        .map(|(_, v)| v)
-        .collect();
-    (values, removed)
+        .collect()
 }
 
 /// Remove higher values (y) from XY
-/// Returns XY-list and removed indexes
-pub fn remove_higher_y(mut values: Vec<XY>, highest: f64) -> (Vec<XY>, Vec<usize>) {
-    let mut removed = Vec::new();
-    values = values
+/// Returns XY-list
+pub fn remove_higher_y(values: Vec<XY>, highest: f64) -> Vec<XY> {
+    values
         .into_iter()
-        .enumerate()
-        .filter(|(i, v)| {
+        .filter(|v| {
             if v.1 <= highest {
-                removed.push(*i);
                 return true;
             }
             false
         })
-        .map(|(_, v)| v)
-        .collect();
-    (values, removed)
+        .collect()
 }
 
 /// Remove lower values (y) from XY
-/// Returns XY-list and removed indexes
-pub fn remove_lower_y(mut values: Vec<XY>, lowest: f64) -> (Vec<XY>, Vec<usize>) {
-    let mut removed = Vec::new();
-    values = values
+/// Returns XY-list
+pub fn remove_lower_y(values: Vec<XY>, lowest: f64) -> Vec<XY> {
+    values
         .into_iter()
-        .enumerate()
-        .filter(|(i, v)| {
+        .filter(|v| {
             if v.1 >= lowest {
-                removed.push(*i);
                 return true;
             }
             false
         })
-        .map(|(_, v)| v)
-        .collect();
-    (values, removed)
+        .collect()
 }

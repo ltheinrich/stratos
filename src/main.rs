@@ -23,6 +23,8 @@ use std::{env, thread};
 fn main() {
     // init
     init_version();
+
+    // parse arguments
     let args: Vec<String> = env::args().collect();
     let cmd = Command::from(&args, &["log", "help"]);
     if cmd.is_option("help") {
@@ -74,8 +76,10 @@ fn main() {
 
     // print info message
     if addr == "[::]" {
+        // default message
         println!("Öffne Stratos im Browser: http://localhost:{}", port);
     } else {
+        // more technical ;)
         println!("Der Server läuft unter {}:{}", addr, port);
     }
 
@@ -106,14 +110,15 @@ fn conf_cli<'a>(
             *size = v;
         }
     }
-    *size *= 1_048_576;
+    *size *= 1_048_576; // byte to mb
     if let Some(v) = cmd.get_parameter("threads") {
+        // parse to u8
         if let Ok(v) = v.parse() {
             *threads = v;
         }
     }
-    *threads -= if *threads > 0 { 1 } else { 0 };
-    *log = cmd.is_option("log") || *log;
+    *threads -= if *threads > 0 { 1 } else { 0 }; // one starts always
+    *log = cmd.is_option("log") || *log; // each activates logging
 }
 
 // Parse file config
@@ -126,24 +131,27 @@ fn conf_file<'a>(
     log: &mut bool,
 ) {
     // parse file config
-    buf.split('\n')
-        .map(|l| l.splitn(2, '=').map(|c| c.trim()).collect())
+    buf.split('\n') // split lines
+        .map(|l| l.splitn(2, '=').map(|c| c.trim()).collect()) // seperate and trim key and value
         .for_each(|kv: Vec<&str>| {
             if kv.len() == 2 {
                 match kv[0] {
                     "port" => *port = kv[1],
                     "addr" => *addr = kv[1],
                     "size" => {
+                        // parse to usize
                         if let Ok(v) = kv[1].parse() {
                             *size = v;
                         }
                     }
                     "threads" => {
+                        // parse to u8
                         if let Ok(v) = kv[1].parse() {
                             *threads = v;
                         }
                     }
                     "log" => {
+                        // parse to bool
                         if let Ok(v) = kv[1].parse() {
                             *log = v;
                         }

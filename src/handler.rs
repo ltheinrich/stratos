@@ -12,11 +12,16 @@ use std::thread;
 // Accept connections
 pub fn accept_connections(listener: Arc<RwLock<TcpListener>>, log: bool, size: usize) {
     loop {
+        // accept connection
         if let Ok((stream, addr)) = listener.read().unwrap().accept() {
+            // spawn new thread
             thread::spawn(move || {
+                // print log if enabled
                 if log {
                     println!("Log: Anfrage von {}", addr.ip());
                 }
+
+                // handle connection
                 handle_connection(stream, size);
             });
         }
@@ -31,6 +36,7 @@ fn handle_connection(mut stream: TcpStream, max_content: usize) {
         let http_request = match HttpRequest::from(&header, rest, &mut stream, max_content) {
             Some(http_request) => http_request,
             None => {
+                // error
                 return respond(
                     &mut stream,
                     format!(
@@ -41,7 +47,7 @@ fn handle_connection(mut stream: TcpStream, max_content: usize) {
                     "text/html",
                     None,
                 )
-                .unwrap()
+                .unwrap();
             }
         };
 
@@ -82,9 +88,10 @@ fn handle_connection(mut stream: TcpStream, max_content: usize) {
 fn process_request(http_request: &HttpRequest, stream: &mut TcpStream) {
     // parse post parameters
     let post_params = match http_request.post() {
-                Some(post_params) => post_params,
-                None => {
-                    return respond(
+        Some(post_params) => post_params,
+        None => {
+            // error
+            return respond(
                         stream,
                         format!(
                             "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die POST-Anfrage konnte nicht gelesen werden</div><small class=\"form-text text-muted\">Möglicherweise hast du keine Log-Datei ausgewählt oder dein Browser wird nicht unterstützt (nutze in diesem Fall Firefox)</small>{}",
@@ -94,39 +101,45 @@ fn process_request(http_request: &HttpRequest, stream: &mut TcpStream) {
                         "text/html",
                         None,
                     )
-                    .unwrap()
-                }
-            };
+                    .unwrap();
+        }
+    };
 
     // raw log file
     let file = match post_params.get("file") {
-                Some(file) => file,
-                None => {
-                    return respond(
+        Some(file) => file,
+        None => {
+            // error
+            return respond(
                         stream,
                         format!("{}{}<div class=\"alert alert-danger\" role=\"alert\">Bitte suche eine Log-Datei aus</div>{}", HEAD, BACK, footer())
                             .as_bytes(),
                         "text/html",
                         None,
                     )
-                    .unwrap()
-                }
-            };
+                    .unwrap();
+        }
+    };
 
+    // check if options page
     if http_request.get().contains_key("options") {
+        // serve options page
         handle_options(stream, &post_params, file);
     } else {
+        // serve index page
         handle_index(stream, file);
     }
 }
 
 // Handle options page
 fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, file: &str) {
+    // get x-axis and y-axis
     let (x_axis, y_axis) = match get_xy_names(stream, post_params) {
         Ok((x_axis, y_axis)) => (x_axis, y_axis),
         Err(_) => return, // already handled :)
     };
 
+    // draw analysis
     let analysis = match draw(
         &file,
         Parameters::from(
@@ -146,6 +159,7 @@ fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, fi
     ) {
         Ok(analysis) => analysis,
         Err(err) => {
+            // error
             return respond(
                 stream,
                 format!(
@@ -159,9 +173,11 @@ fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, fi
                 "text/html",
                 None,
             )
-            .unwrap()
+            .unwrap();
         }
     };
+
+    // serve analysis image
     respond(
         stream,
         analysis.as_bytes(),
@@ -180,6 +196,7 @@ fn get_xy_names<'a>(
     let x_axis = match post_params.get("x") {
         Some(x_axis) => x_axis,
         None => {
+            // error
             respond(
                stream,
                 format!(
@@ -199,6 +216,7 @@ fn get_xy_names<'a>(
     let y_axis = match post_params.get("y") {
         Some(y_axis) => y_axis,
         None => {
+            // error
             respond(
               stream,
                 format!(
@@ -223,6 +241,7 @@ fn handle_index(stream: &mut TcpStream, file: &str) {
     let log = match Log::from(file) {
         Ok(log) => log,
         Err(err) => {
+            // error
             return respond(
                 stream,
                 format!(
@@ -236,11 +255,11 @@ fn handle_index(stream: &mut TcpStream, file: &str) {
                 "text/html",
                 None,
             )
-            .unwrap()
+            .unwrap();
         }
     };
 
-    // options site
+    // serve options site
     respond(
         stream,
         format!(

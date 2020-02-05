@@ -32,14 +32,18 @@ impl<'a> HttpRequest<'a> {
         stream: &mut TcpStream,
         max_content: usize,
     ) -> Option<Self> {
-        // parse method and url
+        // split header
         let mut header = raw_header.lines();
         let mut reqln = header.next()?.split(' ');
+
+        // parse method
         let method = if reqln.next()? == "POST" {
             HttpMethod::POST
         } else {
             HttpMethod::GET
         };
+
+        // parse url and split raw get parameters
         let mut get_raw = "";
         let url = if let Some(full_url) = reqln.next() {
             let mut split_url = full_url.splitn(2, '?');
@@ -61,21 +65,25 @@ impl<'a> HttpRequest<'a> {
             }
         });
 
-        // read body
-        let mut body = String::new();
+        // set time out
         stream
             .set_read_timeout(Some(std::time::Duration::from_millis(2000)))
             .ok()?;
+
+        // get content length
         let buf_len = if let Some(buf_len) = headers.get("Content-Length") {
             Some(buf_len)
         } else {
             headers.get("content-length")
         };
 
-        // check max log size
+        // check max log size and read body
+        let mut body = String::new();
         if let Some(buf_len) = buf_len {
+            // parse buffer length
             let con_len = buf_len.parse::<usize>().ok()?;
             if con_len > max_content {
+                // max log size exceeded
                 respond(stream, format!(
                     "{}{}<div class=\"alert alert-danger\" role=\"alert\">Maximale Log-Größe überschritten</div>{}",
                     HEAD, BACK, footer()
@@ -85,6 +93,7 @@ impl<'a> HttpRequest<'a> {
                 None).unwrap();
                 return None;
             } else {
+                // read body
                 while raw_body.len() < con_len {
                     let mut rest_body = vec![0u8; 65536];
                     let length = stream.r(&mut rest_body).ok()?;
@@ -108,80 +117,107 @@ impl<'a> HttpRequest<'a> {
 
     /// Parse POST parameters
     pub fn post(&self) -> Option<BTreeMap<&str, &str>> {
+        // check if POST method used
         if self.method == HttpMethod::POST {
+            // parse POST parameters
             parse_upload(&self.body)
         } else {
+            // no POST request: return empty map
             Some(BTreeMap::new())
         }
     }
 
     /// Get HTTP request method
     pub fn method(&self) -> &HttpMethod {
+        // return HTTP request method
         &self.method
     }
 
     /// Get URL
     pub fn url(&self) -> &str {
+        // return URL
         self.url
     }
 
     /* unused
     /// Get headers map
     pub fn headers(&self) -> &BTreeMap<&str, &str> {
+        // return headers map
         &self.headers
     }
     */
 
     /// Get GET parameters
     pub fn get(&self) -> &BTreeMap<&str, &str> {
+        // return GET parameters map
         &self.get
     }
 }
 
 // Parse POST file upload with parameters to map
 fn parse_upload(body: &str) -> Option<BTreeMap<&str, &str>> {
+    // parameters map
     let mut params = BTreeMap::new();
 
+    // split file upload body into sections
     for content in body.split("\r\n---") {
+        // split lines (max 4)
         let mut lines = content.splitn(4, "\r\n").skip(1);
         let mut name = "";
+
+        // split in phrases
         for line in lines.next()?.split(';').map(|line| line.trim()) {
+            // check if phrase contains name
             if line.starts_with("name=") {
                 if line.len() > 6 {
+                    // get name
                     name = &line[6..(line.len() - 1)];
                     break;
                 } else {
+                    // no name
                     return None;
                 }
             }
         }
+
+        // get next line
         if let Some(value) = lines.next() {
+            // check for empty line
             if value == "" {
+                // add next line to parameters map
                 params.insert(name, lines.next()?);
             } else {
+                // ignore first empty line and add second line to parameters map
                 let mut a = lines.next()?.splitn(2, "\r\n");
                 params.insert(name, a.nth(1)?);
             }
         }
     }
 
+    // return parameters map
     Some(params)
 }
 
 // Parse GET parameters to map
 fn parse_parameters(raw: &str) -> Option<BTreeMap<&str, &str>> {
+    // parameters map
     let mut params = BTreeMap::new();
+
+    // split parameters by ampersand
     for p in raw.split('&') {
+        // split key and value and add to map
         let mut ps = p.splitn(2, '=');
         params.insert(
-            ps.next()?.trim(),
+            ps.next()?.trim(), // trimmed key
             if let Some(value) = ps.next() {
-                value.trim()
+                value.trim() // trimmed value
             } else {
-                ""
+                "" // no value, is option
             },
         );
     }
+
+    // return parameters map
     Some(params)
 }
 
@@ -192,12 +228,14 @@ pub fn respond(
     content_type: &str,
     filename: Option<&str>,
 ) -> io::Result<()> {
+    // write headers to stream
     stream
         .wa(format!(
             "HTTP/1.1 200 OK\r\nServer: ltheinrich.de stratos/{}\r\nContent-Type: {}\r\nContent-Length: {}{}\r\n\r\n",
             version(),
             content_type,
             content.len(),
+            // optional filename for download
             if let Some(filename) = filename {
                 format!("\r\nContent-Disposition: attachment; filename=\"{}\"", filename)
             } else {
@@ -205,12 +243,15 @@ pub fn respond(
             }
         )
         .as_bytes())?;
+
+    // write body and end
     stream.wa(content)?;
     stream.wa(b"\r\n")
 }
 
 /// HTTP redirecter
 pub fn redirect(stream: &mut TcpStream, url: &str) -> io::Result<()> {
+    // write redirect headers and simple body
     stream.wa(format!(
         "HTTP/1.1 303 See Other\r\nServer: ltheinrich.de stratos/{}\r\nLocation: {1}\r\n\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1><p><a href=\"{1}\">{1}</a></p></body></html>\r\n",
         version(),
@@ -219,11 +260,12 @@ pub fn redirect(stream: &mut TcpStream, url: &str) -> io::Result<()> {
     .as_bytes())
 }
 
-/// Read until \r\n\r\n
+/// Read until \r\n\r\n (just working, uncommented)
 pub fn read_header(stream: &mut TcpStream) -> Result<(String, Vec<u8>), Error> {
     let mut header = Vec::new();
     let mut rest = Vec::new();
     let mut buf = vec![0u8; 8192];
+
     'l: loop {
         let length = match stream.r(&mut buf) {
             Ok(length) => length,

@@ -1,6 +1,6 @@
 //! General functions
 
-use crate::analyze::{highest_x, highest_y, lowest_x, lowest_y, set_range, split_up};
+use crate::analyze::{highest, highest_x, highest_y, lowest_x, lowest_y, set_range, split_up};
 use crate::parse::to_xy;
 use crate::XY;
 use crate::{Log, Parameters};
@@ -27,18 +27,39 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
     let x_values = log.at_key(params.x_axis)?;
     let y_values = log.at_key(params.y_axis)?;
     let values = to_xy(&x_values, &y_values)?;
-    let mut height_values = match params.height {
-        Some(height) => Some(log.at_key(height)?),
-        None => None,
+
+    // get highest and lowest
+    let highest_x = highest_x(&values).1;
+    let highest_y = highest_y(&values).1;
+    let lowest_x = lowest_x(&values).1;
+    let lowest_y = lowest_y(&values).1;
+
+    // get highest
+    let highest = if let Some(height) = params.height {
+        if let Ok(height_values) = log.at_key(height) {
+            highest(&height_values).0
+        } else {
+            values.len()
+        }
+    } else {
+        values.len()
     };
 
-    let values = set_range(
-        values,
+    // split and set range
+    let (rise_values, fall_values) = split_up(values, highest);
+    let rise_values = set_range(
+        rise_values,
         params.x_min,
         params.x_max,
         params.y_min,
         params.y_max,
-        &mut height_values,
+    );
+    let fall_values = set_range(
+        fall_values,
+        params.x_min,
+        params.x_max,
+        params.y_min,
+        params.y_max,
     );
 
     // create view
@@ -54,25 +75,11 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
             params.y_axis.to_string()
         });
 
-    // create scatters
-    let mut scatters = (Scatter::from_slice(&[]), Scatter::from_slice(&[]));
-    if let Some(height_values) = height_values {
-        // split and create scatters
-        let (rise_values, fall_values) = split_up(&values, &height_values);
-        let rise_scatter = new_scatter(&rise_values, params.colour, params.size);
-        let fall_scatter = new_scatter(&fall_values, params.colour_fall, params.size);
-
-        // add scatters
-        scatters.0 = rise_scatter;
-        scatters.1 = fall_scatter;
-        view = view.add(&scatters.0);
-        view = view.add(&scatters.1);
-    } else {
-        // create and add scatter to vector
-        let scatter = new_scatter(&values, params.colour, params.size);
-        scatters.0 = scatter;
-        view = view.add(&scatters.0);
-    }
+    // add scatters to view
+    let rise_scatter = new_scatter(&rise_values, params.colour, params.size);
+    let fall_scatter = new_scatter(&fall_values, params.colour_fall, params.size);
+    view = view.add(&rise_scatter);
+    view = view.add(&fall_scatter);
 
     // set x-range
     if let (Some(x_min), Some(x_max)) = (params.x_min, params.x_max) {
@@ -81,11 +88,11 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
         }
     } else if let Some(x_min) = params.x_min {
         if let Ok(x_min) = x_min.parse() {
-            view = view.x_range(x_min, highest_x(&values).1);
+            view = view.x_range(x_min, highest_x);
         }
     } else if let Some(x_max) = params.x_max {
         if let Ok(x_max) = x_max.parse() {
-            view = view.x_range(lowest_x(&values).1, x_max);
+            view = view.x_range(lowest_x, x_max);
         }
     }
 
@@ -96,11 +103,11 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
         }
     } else if let Some(y_min) = params.y_min {
         if let Ok(y_min) = y_min.parse() {
-            view = view.y_range(y_min, highest_y(&values).1);
+            view = view.y_range(y_min, highest_y);
         }
     } else if let Some(y_max) = params.y_max {
         if let Ok(y_max) = y_max.parse() {
-            view = view.y_range(lowest_y(&values).1, y_max);
+            view = view.y_range(lowest_y, y_max);
         }
     }
 
