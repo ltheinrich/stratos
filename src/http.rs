@@ -234,7 +234,7 @@ pub fn respond(
             "HTTP/1.1 200 OK\r\nServer: ltheinrich.de stratos/{}\r\nContent-Type: {}\r\nContent-Length: {}{}\r\n\r\n",
             version(),
             content_type,
-            content.len(),
+            content.len() + 2, // bugfix (proxying)
             // optional filename for download
             if let Some(filename) = filename {
                 format!("\r\nContent-Disposition: attachment; filename=\"{}\"", filename)
@@ -246,7 +246,8 @@ pub fn respond(
 
     // write body and end
     stream.wa(content)?;
-    stream.wa(b"\r\n")
+    stream.wa(b"\r\n")?;
+    stream.f()
 }
 
 /// HTTP redirecter
