@@ -114,10 +114,9 @@ fn conf_cli<'a>(
     if let Some(v) = cmd.get_parameter("threads") {
         // parse to u8
         if let Ok(v) = v.parse() {
-            *threads = v;
+            *threads = if v > 0 { v - 1 } else { v };
         }
     }
-    *threads -= if *threads > 0 { 1 } else { 0 }; // one starts always
     *log = cmd.is_option("log") || *log; // each activates logging
 }
 
@@ -147,7 +146,7 @@ fn conf_file<'a>(
                     "threads" => {
                         // parse to u8
                         if let Ok(v) = kv[1].parse() {
-                            *threads = v;
+                            *threads = if v > 0 { v - 1 } else { v };
                         }
                     }
                     "log" => {
