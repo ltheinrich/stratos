@@ -27,4 +27,8 @@ assets = [
     ["deb/stratos.service", "etc/systemd/system/stratos.service", "644"],
     ["README.md", "usr/share/doc/cargo-deb/README", "644"],
 ]
+conf-files = [
+    "/etc/stratos.conf",
+    "/etc/systemd/system/stratos.service"
+]
 extended-description = "Stratos analyzes the log file of stratosphere balloon flights"
