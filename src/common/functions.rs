@@ -5,8 +5,8 @@ use crate::parse::to_xy;
 use crate::XY;
 use crate::{Log, Parameters};
 use plotlib::page::Page;
-use plotlib::scatter::{Scatter, Style};
-use plotlib::style::Point;
+use plotlib::repr::Plot;
+use plotlib::style::PointStyle;
 use plotlib::view::ContinuousView;
 use std::error;
 
@@ -75,11 +75,11 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
             params.y_axis.to_string()
         });
 
-    // add scatters to view
-    let rise_scatter = new_scatter(&rise_values, params.colour, params.size);
-    let fall_scatter = new_scatter(&fall_values, params.colour_fall, params.size);
-    view = view.add(&rise_scatter);
-    view = view.add(&fall_scatter);
+    // add plots to view
+    let rise_plot = new_plot(rise_values, params.colour, params.size);
+    let fall_plot = new_plot(fall_values, params.colour_fall, params.size);
+    view = view.add(rise_plot);
+    view = view.add(fall_plot);
 
     // set x-range
     if let (Some(x_min), Some(x_max)) = (params.x_min, params.x_max) {
@@ -115,10 +115,10 @@ pub fn draw<'a>(log: &'a str, params: Parameters) -> Result<String, Box<dyn erro
     Ok(Page::single(&view).to_svg()?.to_string())
 }
 
-/// Create scatter
-fn new_scatter(values: &[XY], colour: Option<&&str>, size: Option<&&str>) -> Scatter {
-    Scatter::from_slice(values).style(
-        &Style::new()
+/// Create plot
+fn new_plot(values: Vec<XY>, colour: Option<&&str>, size: Option<&&str>) -> Plot {
+    Plot::new(values).point_style(
+        PointStyle::new()
             .colour(if let Some(colour) = colour {
                 (*colour).to_string()
             } else {
