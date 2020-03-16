@@ -35,7 +35,7 @@ fn main() {
     let mut port = "3490";
     let mut addr = "[::]";
     let mut size = 10;
-    let mut threads = 2;
+    let mut threads = 1; // default value must be -1 the actual default value
     let mut log = false;
 
     // parse config file
