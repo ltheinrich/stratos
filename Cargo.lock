@@ -92,7 +92,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "stratos"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "kern 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "plotlib 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
