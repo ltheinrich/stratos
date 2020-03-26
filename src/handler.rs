@@ -3,7 +3,7 @@
 use crate::common::*;
 use crate::http::{read_header, redirect, respond, HttpMethod, HttpRequest};
 use crate::parse::Log;
-use kern::Error;
+use kern::Fail;
 use std::collections::BTreeMap;
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, RwLock};
@@ -191,7 +191,7 @@ fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, fi
 fn get_xy_names<'a>(
     stream: &mut TcpStream,
     post_params: &BTreeMap<&'a str, &'a str>,
-) -> Result<(&'a str, &'a str), Error> {
+) -> Result<(&'a str, &'a str), Fail> {
     // x-axis
     let x_axis = match post_params.get("x") {
         Some(x_axis) => x_axis,
@@ -208,7 +208,7 @@ fn get_xy_names<'a>(
                 None,
             )
             .unwrap();
-            return Error::from("x-Achse wurde nicht angegeben");
+            return Fail::from("x-Achse wurde nicht angegeben");
         }
     };
 
@@ -228,7 +228,7 @@ fn get_xy_names<'a>(
                 None,
             )
             .unwrap();
-            return Error::from("y-Achse wurde nicht angegeben");
+            return Fail::from("y-Achse wurde nicht angegeben");
         }
     };
 

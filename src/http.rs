@@ -1,10 +1,9 @@
 //! HTTP parsing
 
-use crate::{common::*, version};
-use kern::net::Stream;
-use kern::Error;
+use crate::common::*;
+use kern::{version, Fail};
 use std::collections::BTreeMap;
-use std::io;
+use std::io::{self, Read, Write};
 use std::net::TcpStream;
 
 /// HTTP request method (GET or POST)
@@ -96,7 +95,7 @@ impl<'a> HttpRequest<'a> {
                 // read body
                 while raw_body.len() < con_len {
                     let mut rest_body = vec![0u8; 65536];
-                    let length = stream.r(&mut rest_body).ok()?;
+                    let length = stream.read(&mut rest_body).ok()?;
                     rest_body.truncate(length);
                     raw_body.append(&mut rest_body);
                 }
@@ -230,8 +229,8 @@ pub fn respond(
 ) -> io::Result<()> {
     // write headers to stream
     stream
-        .wa(format!(
-            "HTTP/1.1 200 OK\r\nServer: ltheinrich.de stratos/{}\r\nContent-Type: {}\r\nContent-Length: {}{}\r\n\r\n",
+        .write_all(format!(
+            "HTTP/1.1 200 OK\r\nServer: ltheinrich.de/stratos v{}\r\nContent-Type: {}\r\nContent-Length: {}{}\r\n\r\n",
             version(),
             content_type,
             content.len() + 2, // bugfix (proxying)
@@ -245,16 +244,16 @@ pub fn respond(
         .as_bytes())?;
 
     // write body and end
-    stream.wa(content)?;
-    stream.wa(b"\r\n")?;
-    stream.f()
+    stream.write_all(content)?;
+    stream.write_all(b"\r\n")?;
+    stream.flush()
 }
 
 /// HTTP redirecter
 pub fn redirect(stream: &mut TcpStream, url: &str) -> io::Result<()> {
     // write redirect headers and simple body
-    stream.wa(format!(
-        "HTTP/1.1 303 See Other\r\nServer: ltheinrich.de stratos/{}\r\nLocation: {1}\r\n\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1><p><a href=\"{1}\">{1}</a></p></body></html>\r\n",
+    stream.write_all(format!(
+        "HTTP/1.1 303 See Other\r\nServer: ltheinrich.de/stratos v{}\r\nLocation: {1}\r\n\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1><p><a href=\"{1}\">{1}</a></p></body></html>\r\n",
         version(),
         url
     )
@@ -262,23 +261,23 @@ pub fn redirect(stream: &mut TcpStream, url: &str) -> io::Result<()> {
 }
 
 /// Read until \r\n\r\n (just working, uncommented)
-pub fn read_header(stream: &mut TcpStream) -> Result<(String, Vec<u8>), Error> {
+pub fn read_header(stream: &mut TcpStream) -> Result<(String, Vec<u8>), Fail> {
     let mut header = Vec::new();
     let mut rest = Vec::new();
     let mut buf = vec![0u8; 8192];
 
     'l: loop {
-        let length = match stream.r(&mut buf) {
+        let length = match stream.read(&mut buf) {
             Ok(length) => length,
-            Err(err) => return Error::from(err),
+            Err(err) => return Fail::from(err),
         };
         for (i, &c) in buf.iter().enumerate() {
             if c == b'\r' {
                 if buf.len() < i + 4 {
                     let mut buf_temp = vec![0u8; buf.len() - (i + 4)];
-                    match stream.r(&mut buf_temp) {
+                    match stream.read(&mut buf_temp) {
                         Ok(_) => {}
-                        Err(err) => return Error::from(err),
+                        Err(err) => return Fail::from(err),
                     };
                     let buf2 = [&buf[..], &buf_temp[..]].concat();
                     if buf2[i + 1] == b'\n' && buf2[i + 2] == b'\r' && buf2[i + 3] == b'\n' {
@@ -308,7 +307,7 @@ pub fn read_header(stream: &mut TcpStream) -> Result<(String, Vec<u8>), Error> {
     Ok((
         match String::from_utf8(header) {
             Ok(header) => header,
-            Err(err) => return Error::from(err),
+            Err(err) => return Fail::from(err),
         },
         rest,
     ))

@@ -1,6 +1,6 @@
 //! Constant variables
 
-use kern::meta;
+use kern::version;
 
 pub const HEAD: &str = include_str!("../../web/head.html");
 pub const BACK: &str =
@@ -18,23 +18,9 @@ pub const HELP: &str = "Benutzung: stratos [OPTIONEN]\nString S, Integer I, Bool
   --size    I       Maximale Log-Größe in MB (10)
   --threads I       Anzahl der anfangs startenden Threads (2)
   --log             Logging der Anfragen aktivieren";
-const CARGO_TOML: &str = include_str!("../../Cargo.toml");
-static mut VERSION: &str = "";
+pub const CARGO_TOML: &str = include_str!("../../Cargo.toml");
 
 /// Get HTML footer with version
 pub fn footer() -> String {
     format!("</div></div><div class=\"cr\"><small class=\"form-text text-muted\">Stratos v{} &copy; 2019 Lennart Heinrich</small><a href=\"https://github.com/ltheinrich/stratos/issues\">Fehler melden</a></div></body></html>", version())
-}
-
-/// Get version
-pub fn version() -> &'static str {
-    unsafe { VERSION }
-}
-
-/// Set version (unsafe!)
-pub fn init_version() {
-    unsafe {
-        VERSION = meta::version(CARGO_TOML);
-        println!("Stratos {} (c) 2019 Lennart Heinrich\n", VERSION);
-    }
 }
