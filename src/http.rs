@@ -93,11 +93,13 @@ impl<'a> HttpRequest<'a> {
                 return None;
             } else {
                 // read body
-                while raw_body.len() < con_len {
-                    let mut rest_body = vec![0u8; 65536];
+                let mut tries = 0;
+                while raw_body.len() < con_len && (tries < max_content / 1_048_576 || tries < 5) {
+                    let mut rest_body = vec![0u8; con_len];
                     let length = stream.read(&mut rest_body).ok()?;
                     rest_body.truncate(length);
                     raw_body.append(&mut rest_body);
+                    tries += 1;
                 }
                 body = String::from_utf8(raw_body).ok()?;
             }
@@ -266,7 +268,7 @@ pub fn read_header(stream: &mut TcpStream) -> Result<(String, Vec<u8>), Fail> {
     let mut rest = Vec::new();
     let mut buf = vec![0u8; 8192];
 
-    'l: loop {
+    'l: while buf.len() < 16384 {
         let length = match stream.read(&mut buf) {
             Ok(length) => length,
             Err(err) => return Fail::from(err),
