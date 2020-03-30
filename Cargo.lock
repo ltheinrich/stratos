@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "kern"
-version = "1.1.0"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -94,7 +94,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "stratos"
 version = "0.1.9"
 dependencies = [
- "kern 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kern 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "plotlib 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -136,7 +136,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)" = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 "checksum failure 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "b8529c2421efa3066a5cbd8063d2244603824daccb6936b079010bb2aa89464b"
 "checksum failure_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "030a733c8287d6213886dd487564ff5c8f6aae10278b3588ed177f9d18f8d231"
-"checksum kern 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e2015cba37b405a42127f58d822a619dcab465bb0d7f3a5b980f487419ca1fd1"
+"checksum kern 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "081afde2e0ded40c86d92a5b3e74362accd93e2dcf5a3561bb7ded0ba4c47e8c"
 "checksum libc 0.2.68 (registry+https://github.com/rust-lang/crates.io-index)" = "dea0c0405123bba743ee3f91f49b1c7cfb684eef0da0a50110f758ccf24cdff0"
 "checksum plotlib 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1aa58870a9b439c7acecd3f06d233727a7324dda6f260302230e7519e3b88409"
 "checksum proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)" = "6c09721c6781493a2a492a96b5a5bf19b65917fe6728884e7c44dd0c60ca3435"
