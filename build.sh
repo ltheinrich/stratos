@@ -1,6 +1,5 @@
 #!/bin/sh
 
-cargo update
 cargo clean
 mkdir -p target/bin
 
