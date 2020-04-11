@@ -11,9 +11,9 @@ use plotlib::style::PointStyle;
 use plotlib::view::ContinuousView;
 
 /// None instead of ""
-pub fn none_empty<'a, 'b>(opt: Option<&'a &'b str>) -> Option<&'a &'b str> {
+pub fn none_empty(opt: Option<&String>) -> Option<&String> {
     if let Some(value) = opt {
-        if value == &"" {
+        if value == "" {
             return None;
         }
     }
@@ -119,7 +119,7 @@ pub fn draw(log: &str, params: Parameters) -> Result<String, Fail> {
 }
 
 /// Create plot
-fn new_plot(values: Vec<XY>, colour: Option<&&str>, size: Option<&&str>) -> Plot {
+fn new_plot(values: Vec<XY>, colour: Option<&String>, size: Option<&String>) -> Plot {
     Plot::new(values).point_style(
         PointStyle::new()
             .colour(if let Some(colour) = colour {

@@ -106,10 +106,10 @@ pub fn lowest_y(values: &[XY]) -> (usize, f64) {
 /// Set range for XY values
 pub fn set_range(
     mut values: Vec<XY>,
-    x_min: Option<&&str>,
-    x_max: Option<&&str>,
-    y_min: Option<&&str>,
-    y_max: Option<&&str>,
+    x_min: Option<&String>,
+    x_max: Option<&String>,
+    y_min: Option<&String>,
+    y_max: Option<&String>,
 ) -> Vec<XY> {
     // set x-min
     if let Some(x_min) = x_min {

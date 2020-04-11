@@ -1,142 +1,97 @@
 //! Web handler
 
 use crate::common::*;
-use crate::http::{read_header, redirect, respond, HttpMethod, HttpRequest};
 use crate::parse::Log;
 use kern::Fail;
+use lhi::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
 use std::collections::BTreeMap;
-use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, RwLock};
-use std::thread;
 
-// Accept connections
-pub fn accept_connections(listener: Arc<RwLock<TcpListener>>, log: bool, size: usize) {
-    loop {
-        // accept connection
-        if let Ok((stream, addr)) = listener.read().unwrap().accept() {
-            // spawn new thread
-            thread::spawn(move || {
-                // print log if enabled
-                if log {
-                    println!("Log: Anfrage von {}", addr.ip());
-                }
-
-                // handle connection
-                handle_connection(stream, size);
-            });
-        }
-    }
-}
-
-// Handle connection
-fn handle_connection(mut stream: TcpStream, max_content: usize) {
+// Handle HTTP request
+pub fn handle(req: Result<HttpRequest, Fail>, _: Arc<RwLock<()>>) -> Result<Vec<u8>, Fail> {
     // read header
-    if let Ok((header, rest)) = read_header(&mut stream) {
-        // parse HTTP request
-        let http_request = match HttpRequest::from(&header, rest, &mut stream, max_content) {
-            Some(http_request) => http_request,
-            None => {
-                // error
-                return respond(
-                    &mut stream,
-                    format!(
-                        "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die HTTP-Anfrage konnte nicht gelesen werden</div>{}",
-                        HEAD, BACK, footer()
-                    )
-                    .as_bytes(),
-                    "text/html",
-                    None,
-                )
-                .unwrap();
-            }
-        };
-
+    if let Ok(req) = req {
         // match URL
-        match &http_request.url()[1..] {
-            "favicon.ico" => respond(&mut stream, FAVICON_ICO, "image/x-icon", None).unwrap(),
-            "favicon.png" => respond(&mut stream, FAVICON_PNG, "image/png", None).unwrap(),
-            "apple-touch-icon.png" => {
-                respond(&mut stream, APPLE_TOUCH_ICON, "image/png", None).unwrap()
-            }
-            "bootstrap.min.css" => respond(&mut stream, BOOTSTRAP, "text/css", None).unwrap(),
-            "style.css" => respond(&mut stream, STYLE, "text/css", None).unwrap(),
+        return Ok(match &req.url()[1..] {
+            "favicon.ico" => respond(FAVICON_ICO, "image/x-icon", None),
+            "favicon.png" => respond(FAVICON_PNG, "image/png", None),
+            "apple-touch-icon.png" => respond(APPLE_TOUCH_ICON, "image/png", None),
+            "bootstrap.min.css" => respond(BOOTSTRAP, "text/css", None),
+            "style.css" => respond(STYLE, "text/css", None),
             _ => {
                 // check if POST
-                if http_request.method() == &HttpMethod::POST {
+                if req.method() == &HttpMethod::POST {
                     // process POST request
-                    process_request(&http_request, &mut stream)
-                } else if http_request.get().contains_key("options") {
+                    process_request(&req)
+                } else if req.get().contains_key("options") {
                     // redirect GET with ?options to /
-                    redirect(&mut stream, "/").unwrap()
+                    redirect("/")
                 } else {
                     // serve index page
                     respond(
-                        &mut stream,
                         format!("{}{}{}", HEAD, INDEX.replace("%LOG_FILE%", ""), footer())
                             .as_bytes(),
                         "text/html",
                         None,
                     )
-                    .unwrap()
                 }
             }
-        }
+        });
     }
+
+    // invalid HTTP request
+    Ok(respond(
+        format!(
+            "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die HTTP-Anfrage konnte nicht gelesen werden</div>{}",
+            HEAD, BACK, footer()
+        ),
+        "text/html",
+        None,
+    ))
 }
 
 // Process HTTP POST request
-fn process_request(http_request: &HttpRequest, stream: &mut TcpStream) {
-    // parse post parameters
-    let post_params = match http_request.post() {
-        Some(post_params) => post_params,
-        None => {
-            // error
-            return respond(
-                        stream,
-                        format!(
-                            "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die POST-Anfrage konnte nicht gelesen werden</div><small class=\"form-text text-muted\">Möglicherweise hast du keine Log-Datei ausgewählt oder dein Browser wird nicht unterstützt (nutze in diesem Fall Firefox)</small>{}",
-                            HEAD, BACK, footer()
-                        )
-                        .as_bytes(),
-                        "text/html",
-                        None,
-                    )
-                    .unwrap();
-        }
-    };
-
+fn process_request(http_request: &HttpRequest) -> Vec<u8> {
     // raw log file
-    let file = match post_params.get("file") {
+    let file = match http_request.post().get("file") {
         Some(file) => file,
         None => {
             // error
             return respond(
-                        stream,
-                        format!("{}{}<div class=\"alert alert-danger\" role=\"alert\">Bitte suche eine Log-Datei aus</div>{}", HEAD, BACK, footer())
-                            .as_bytes(),
+                        format!("{}{}<div class=\"alert alert-danger\" role=\"alert\">Bitte suche eine Log-Datei aus</div>{}", HEAD, BACK, footer()),
                         "text/html",
                         None,
-                    )
-                    .unwrap();
+                    );
         }
     };
-
     // check if options page
     if http_request.get().contains_key("options") {
         // serve options page
-        handle_options(stream, &post_params, file);
+        handle_options(http_request.post(), file)
     } else {
         // serve index page
-        handle_index(stream, file);
+        handle_index(file)
     }
 }
 
 // Handle options page
-fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, file: &str) {
+fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8> {
     // get x-axis and y-axis
-    let (x_axis, y_axis) = match get_xy_names(stream, post_params) {
+    let (x_axis, y_axis) = match get_xy_names(post_params) {
         Ok((x_axis, y_axis)) => (x_axis, y_axis),
-        Err(_) => return, // already handled :)
+        Err(err) => {
+            return respond(
+                format!(
+                    "{}{}<div class=\"alert alert-danger\" role=\"alert\">{}</div>{}",
+                    HEAD,
+                    BACK,
+                    err,
+                    footer()
+                ),
+                "text/html",
+                None,
+            )
+        }
     };
 
     // draw analysis
@@ -161,7 +116,6 @@ fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, fi
         Err(err) => {
             // error
             return respond(
-                stream,
                 format!(
                     "{}{}<div class=\"alert alert-danger\" role=\"alert\">{}</div>{}",
                     HEAD,
@@ -172,102 +126,64 @@ fn handle_options(stream: &mut TcpStream, post_params: &BTreeMap<&str, &str>, fi
                 .as_bytes(),
                 "text/html",
                 None,
-            )
-            .unwrap();
+            );
         }
     };
 
     // serve analysis image
-    respond(
-        stream,
-        analysis.as_bytes(),
-        "image/svg",
-        Some("analysis.svg"),
-    )
-    .unwrap();
+    let mut headers = BTreeMap::new();
+    headers.insert(
+        "content-disposition",
+        "attachment; filename=\"analysis.svg\"",
+    );
+    let mut resp_data = ResponseData::new();
+    resp_data.headers = headers;
+    respond(analysis.as_bytes(), "image/svg", Some(resp_data))
 }
 
 // Get x-axis name and y-axis name
-fn get_xy_names<'a>(
-    stream: &mut TcpStream,
-    post_params: &BTreeMap<&'a str, &'a str>,
-) -> Result<(&'a str, &'a str), Fail> {
-    // x-axis
-    let x_axis = match post_params.get("x") {
-        Some(x_axis) => x_axis,
-        None => {
-            // error
-            respond(
-               stream,
-                format!(
-                    "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die Angabe der x-Achse ist erforderlich</div>{}",
-                    HEAD, BACK, footer()
-                )
-                .as_bytes(),
-                "text/html",
-                None,
-            )
-            .unwrap();
-            return Fail::from("x-Achse wurde nicht angegeben");
-        }
-    };
+fn get_xy_names<'a>(post_params: &'a BTreeMap<String, String>) -> Result<(&'a str, &'a str), Fail> {
+    // x-/y-axis
+    let x_axis = post_params
+        .get("x")
+        .ok_or_else(|| Fail::new("Die Angabe der x-Achse ist erforderlich"))?;
+    let y_axis = post_params
+        .get("y")
+        .ok_or_else(|| Fail::new("Die Angabe der y-Achse ist erforderlich"))?;
 
-    // y-axis
-    let y_axis = match post_params.get("y") {
-        Some(y_axis) => y_axis,
-        None => {
-            // error
-            respond(
-              stream,
-                format!(
-                    "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die Angabe der y-Achse ist erforderlich</div>{}",
-                    HEAD, BACK, footer()
-                )
-                .as_bytes(),
-                "text/html",
-                None,
-            )
-            .unwrap();
-            return Fail::from("y-Achse wurde nicht angegeben");
-        }
-    };
-
+    // return
     Ok((x_axis, y_axis))
 }
 
 // Handle index page
-fn handle_index(stream: &mut TcpStream, file: &str) {
+fn handle_index(file: &str) -> Vec<u8> {
     // parse log file
     let log = match Log::from(file) {
         Ok(log) => log,
         Err(err) => {
             // error
             return respond(
-                stream,
                 format!(
                     "{}{}<div class=\"alert alert-danger\" role=\"alert\">{}</div>{}",
                     HEAD,
                     BACK,
-                    err.to_string(),
+                    err,
                     footer()
-                )
-                .as_bytes(),
+                ),
                 "text/html",
                 None,
-            )
-            .unwrap();
+            );
         }
     };
 
     // serve options site
     respond(
-        stream,
         format!(
             "{}{}{}{}",
             HEAD,
             BACK,
             OPTIONS
-                .replace("LOG_FILE", file)
+                .replace("%LOG_FILE%", file)
                 .replace("%HEADER_NAMES%", &header_options(log.header())),
             footer()
         )
@@ -275,7 +191,6 @@ fn handle_index(stream: &mut TcpStream, file: &str) {
         "text/html",
         None,
     )
-    .unwrap()
 }
 
 // Header names as HTML options
