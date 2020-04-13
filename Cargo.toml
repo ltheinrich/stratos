@@ -10,7 +10,7 @@ readme = "README.md"
 
 [dependencies]
 kern = "1.1.4"
-lhi = "=0.0.0-dev.11" # 0.0.0 is outdated
+lhi = "=0.0.0" # 0.0.0 is outdated
 plotlib = "0.5.1"
 
 [profile.release]
