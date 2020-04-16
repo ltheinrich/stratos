@@ -79,9 +79,9 @@ dependencies = [
 
 [[package]]
 name = "kern"
-version = "1.1.4"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd18ac119c33371c24abef4cfbc07ac156fb7e944d7a3f3c36817c675561bff5"
+checksum = "231129465395bd4048b3345ffe52a77365248269e4b9e8b3eff5f3a36a90346d"
 
 [[package]]
 name = "lazy_static"
@@ -91,9 +91,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "lhi"
-version = "0.0.0-dev.11"
+version = "0.0.0-dev.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a3ebbbad0a8b833981cf99e1e87a1745af7445fe049f9feaa0c1ec62db1822b"
+checksum = "d728f85d17e750990f99ae1b9a24eb11a61aeb4d6f3a4022916397e06fd70e51"
 dependencies = [
  "kern",
  "rustls",
@@ -101,9 +101,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.68"
+version = "0.2.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dea0c0405123bba743ee3f91f49b1c7cfb684eef0da0a50110f758ccf24cdff0"
+checksum = "99e85c08494b21a9054e7fe1374a732aeadaff3980b6990b94bfd3a70f690005"
 
 [[package]]
 name = "log"
@@ -194,7 +194,7 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "stratos"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "kern",
  "lhi",

@@ -52,8 +52,11 @@ pub fn handle(req: Result<HttpRequest, Fail>, _: Arc<RwLock<()>>) -> Result<Vec<
 
 // Process HTTP POST request
 fn process_request(http_request: &HttpRequest) -> Vec<u8> {
+    // parse post map as utf-8
+    let post = http_request.post_utf8();
+
     // raw log file
-    let file = match http_request.post().get("file") {
+    let file = match post.get("file") {
         Some(file) => file,
         None => {
             // error
@@ -67,7 +70,7 @@ fn process_request(http_request: &HttpRequest) -> Vec<u8> {
     // check if options page
     if http_request.get().contains_key("options") {
         // serve options page
-        handle_options(http_request.post(), file)
+        handle_options(&post, file)
     } else {
         // serve index page
         handle_index(file)

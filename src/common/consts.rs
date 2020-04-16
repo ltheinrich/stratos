@@ -1,6 +1,6 @@
 //! Constant variables
 
-use kern::version;
+use kern::meta::version;
 
 pub const HEAD: &str = include_str!("../../web/head.html");
 pub const BACK: &str =

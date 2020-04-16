@@ -7,7 +7,7 @@ mod parse;
 
 use common::*;
 use handler::handle;
-use kern::{init_version, Command, Config};
+use kern::{meta::init_version, Command, Config};
 use lhi::server::{certificate_config, listen, unsecure::listen_redirect, HttpSettings};
 use parse::Log;
 use std::env;
