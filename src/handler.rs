@@ -2,8 +2,8 @@
 
 use crate::common::*;
 use crate::parse::Log;
+use kern::http::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
 use kern::Fail;
-use lhi::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
 use std::collections::BTreeMap;
 use std::sync::{Arc, RwLock};
 
