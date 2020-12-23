@@ -4,7 +4,7 @@ use kern::meta::version;
 
 pub const HEAD: &str = include_str!("../../web/head.html");
 pub const BACK: &str =
-  "<a href=\"/\"><button class=\"btn btn-outline-secondary btn-sm\">Zurück</button></a>";
+    "<a href=\"/\"><button class=\"btn btn-outline-secondary btn-sm\">Zurück</button></a>";
 pub const INDEX: &str = include_str!("../../web/index.html");
 pub const OPTIONS: &str = include_str!("../../web/options.html");
 pub const BOOTSTRAP: &[u8] = include_bytes!("../../web/bootstrap.min.css");
@@ -21,5 +21,5 @@ pub const CARGO_TOML: &str = include_str!("../../Cargo.toml");
 
 /// Get HTML footer with version
 pub fn footer() -> String {
-  format!("</div></div><div class=\"cr\"><small class=\"form-text text-muted\">Stratos v{} &copy; 2019 Lennart Heinrich</small><a href=\"https://ltheinrich.de/stratos\">Quellcode</a></div></body></html>", version())
+    format!("</div></div><div class=\"cr\"><small class=\"form-text text-muted\">Stratos v{} &copy; 2019 Lennart Heinrich</small><a href=\"https://ltheinrich.de/stratos\">Quellcode</a></div></body></html>", version())
 }
