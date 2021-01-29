@@ -145,7 +145,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
 }
 
 // Get x-axis name and y-axis name
-fn get_xy_names<'a>(post_params: &'a BTreeMap<String, String>) -> Result<(&'a str, &'a str), Fail> {
+fn get_xy_names(post_params: &BTreeMap<String, String>) -> Result<(&str, &str), Fail> {
     // x-/y-axis
     let x_axis = post_params
         .get("x")
