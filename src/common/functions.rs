@@ -13,7 +13,7 @@ use plotlib::view::ContinuousView;
 /// None instead of ""
 pub fn none_empty(opt: Option<&String>) -> Option<&String> {
     if let Some(value) = opt {
-        if value == "" {
+        if value.is_empty() {
             return None;
         }
     }
