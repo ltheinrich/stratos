@@ -1,4 +1,4 @@
-![Build Status](https://github.com/ltheinrich/stratos/workflows/Rust/badge.svg)
+[![Build Status](https://ltheinrich.de/stratos/workflows/CI/badge.svg)](https://ltheinrich.de/stratos/actions?query=workflow%3ACI)
 
 # Stratos
 ### Stratosphärenflug Log-Analyse
