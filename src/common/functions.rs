@@ -2,7 +2,7 @@
 
 use crate::analyze::{highest, highest_x, highest_y, lowest_x, lowest_y, set_range, split_up};
 use crate::parse::to_xy;
-use crate::XY;
+use crate::Xy;
 use crate::{Log, Parameters};
 use kern::Fail;
 use plotlib::page::Page;
@@ -119,7 +119,7 @@ pub fn draw(log: &str, params: Parameters) -> Result<String, Fail> {
 }
 
 /// Create plot
-fn new_plot(values: Vec<XY>, colour: Option<&String>, size: Option<&String>) -> Plot {
+fn new_plot(values: Vec<Xy>, colour: Option<&String>, size: Option<&String>) -> Plot {
     Plot::new(values).point_style(
         PointStyle::new()
             .colour(if let Some(colour) = colour {

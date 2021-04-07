@@ -1,9 +1,9 @@
 //! Advanced analysis
 
-use crate::XY;
+use crate::Xy;
 
 /// Split xy-tuple into seperate vectors (rise, fall)
-pub fn split_up(values: Vec<XY>, highest: usize) -> (Vec<XY>, Vec<XY>) {
+pub fn split_up(values: Vec<Xy>, highest: usize) -> (Vec<Xy>, Vec<Xy>) {
     // check if empty vector
     if values.is_empty() {
         return (vec![], vec![]);
@@ -11,7 +11,7 @@ pub fn split_up(values: Vec<XY>, highest: usize) -> (Vec<XY>, Vec<XY>) {
 
     // split into rise and fall
     let mut fall = Vec::new();
-    let rise: Vec<XY> = values
+    let rise: Vec<Xy> = values
         .into_iter()
         .enumerate()
         .filter(|(i, v)| {
@@ -57,7 +57,7 @@ pub fn lowest(values: &[f64]) -> (usize, f64) {
 
 /// Get highest x-value in XY-list
 /// Returns index and value
-pub fn highest_x(values: &[XY]) -> (usize, f64) {
+pub fn highest_x(values: &[Xy]) -> (usize, f64) {
     let mut max = (0, std::f64::MIN);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.0 > max.1 {
@@ -69,7 +69,7 @@ pub fn highest_x(values: &[XY]) -> (usize, f64) {
 
 /// Get lowest x-value in XY-list
 /// Returns index and value
-pub fn lowest_x(values: &[XY]) -> (usize, f64) {
+pub fn lowest_x(values: &[Xy]) -> (usize, f64) {
     let mut min = (0, std::f64::MAX);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.0 < min.1 {
@@ -81,7 +81,7 @@ pub fn lowest_x(values: &[XY]) -> (usize, f64) {
 
 /// Get highest y-value in XY-list
 /// Returns index and value
-pub fn highest_y(values: &[XY]) -> (usize, f64) {
+pub fn highest_y(values: &[Xy]) -> (usize, f64) {
     let mut max = (0, std::f64::MIN);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.1 > max.1 {
@@ -93,7 +93,7 @@ pub fn highest_y(values: &[XY]) -> (usize, f64) {
 
 /// Get lowest y-value in XY-list
 /// Returns index and value
-pub fn lowest_y(values: &[XY]) -> (usize, f64) {
+pub fn lowest_y(values: &[Xy]) -> (usize, f64) {
     let mut min = (0, std::f64::MAX);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.1 < min.1 {
@@ -105,12 +105,12 @@ pub fn lowest_y(values: &[XY]) -> (usize, f64) {
 
 /// Set range for XY values
 pub fn set_range(
-    mut values: Vec<XY>,
+    mut values: Vec<Xy>,
     x_min: Option<&String>,
     x_max: Option<&String>,
     y_min: Option<&String>,
     y_max: Option<&String>,
-) -> Vec<XY> {
+) -> Vec<Xy> {
     // set x-min
     if let Some(x_min) = x_min {
         if let Ok(x_min) = x_min.parse() {
@@ -145,7 +145,7 @@ pub fn set_range(
 
 /// Remove higher values (x) from XY
 /// Returns XY-list
-pub fn remove_higher_x(values: Vec<XY>, highest: f64) -> Vec<XY> {
+pub fn remove_higher_x(values: Vec<Xy>, highest: f64) -> Vec<Xy> {
     values
         .into_iter()
         .filter(|v| {
@@ -159,7 +159,7 @@ pub fn remove_higher_x(values: Vec<XY>, highest: f64) -> Vec<XY> {
 
 /// Remove lower values (x) from XY
 /// Returns XY-list
-pub fn remove_lower_x(values: Vec<XY>, lowest: f64) -> Vec<XY> {
+pub fn remove_lower_x(values: Vec<Xy>, lowest: f64) -> Vec<Xy> {
     values
         .into_iter()
         .filter(|v| {
@@ -173,7 +173,7 @@ pub fn remove_lower_x(values: Vec<XY>, lowest: f64) -> Vec<XY> {
 
 /// Remove higher values (y) from XY
 /// Returns XY-list
-pub fn remove_higher_y(values: Vec<XY>, highest: f64) -> Vec<XY> {
+pub fn remove_higher_y(values: Vec<Xy>, highest: f64) -> Vec<Xy> {
     values
         .into_iter()
         .filter(|v| {
@@ -187,7 +187,7 @@ pub fn remove_higher_y(values: Vec<XY>, highest: f64) -> Vec<XY> {
 
 /// Remove lower values (y) from XY
 /// Returns XY-list
-pub fn remove_lower_y(values: Vec<XY>, lowest: f64) -> Vec<XY> {
+pub fn remove_lower_y(values: Vec<Xy>, lowest: f64) -> Vec<Xy> {
     values
         .into_iter()
         .filter(|v| {

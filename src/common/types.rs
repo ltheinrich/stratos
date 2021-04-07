@@ -1,7 +1,7 @@
 //! General types
 
 /// x and y tuple
-pub type XY = (f64, f64);
+pub type Xy = (f64, f64);
 
 /// Parameter for log drawing
 pub struct Parameters<'a> {

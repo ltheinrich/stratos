@@ -1,6 +1,6 @@
 //! Log parser
 
-use crate::XY;
+use crate::Xy;
 use kern::Fail;
 
 /// Log structure
@@ -121,7 +121,7 @@ impl<'a> Log<'a> {
 }
 
 /// Combine into an XY Vec of two value groups
-pub fn to_xy(values1: &[f64], values2: &[f64]) -> Result<Vec<XY>, Fail> {
+pub fn to_xy(values1: &[f64], values2: &[f64]) -> Result<Vec<Xy>, Fail> {
     // initialize vector
     let mut tuples = Vec::with_capacity(values1.len());
     for &value1 in values1 {
