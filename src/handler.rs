@@ -20,7 +20,7 @@ pub fn handle(req: Result<HttpRequest, Fail>, _: Arc<RwLock<()>>) -> Result<Vec<
             "style.css" => respond(STYLE, "text/css", None),
             _ => {
                 // check if POST
-                if req.method() == &HttpMethod::POST {
+                if req.method() == &HttpMethod::Post {
                     // process POST request
                     process_request(&req)
                 } else if req.get().contains_key("options") {
