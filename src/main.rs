@@ -8,7 +8,7 @@ mod parse;
 use common::*;
 use handler::handle;
 use kern::http::server::{certificate_config, listen, unsecure::listen_redirect, HttpSettings};
-use kern::{meta::init_version, Command, Config};
+use kern::{meta::init_version, CliBuilder, Config};
 use parse::Log;
 use std::env;
 use std::sync::{Arc, RwLock};
@@ -23,7 +23,7 @@ fn main() {
 
     // parse arguments
     let args: Vec<String> = env::args().collect();
-    let cmd = Command::from(&args, &["log", "help"]);
+    let cmd = CliBuilder::new().options(&["log", "help"]).build(&args);
     if cmd.option("help") {
         return println!("{}", HELP);
     }
