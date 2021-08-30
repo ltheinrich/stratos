@@ -23,7 +23,7 @@ pub fn none_empty(opt: Option<&String>) -> Option<&String> {
 /// Analyse log and return svg image
 pub fn draw(log: &str, params: Parameters) -> Result<String, Fail> {
     // parse log
-    let log = Log::from(&log)?;
+    let log = Log::from(log)?;
     let x_values = log.at_key(params.x_axis).or_else(Fail::from)?;
     let y_values = log.at_key(params.y_axis).or_else(Fail::from)?;
     let values = to_xy(&x_values, &y_values).or_else(Fail::from)?;

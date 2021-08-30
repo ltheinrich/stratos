@@ -99,7 +99,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
 
     // draw analysis
     let analysis = match draw(
-        &file,
+        file,
         Parameters::from(
             x_axis,
             y_axis,
