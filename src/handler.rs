@@ -123,7 +123,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
                     "{}{}<div class=\"alert alert-danger\" role=\"alert\">{}</div>{}",
                     HEAD,
                     BACK,
-                    err.to_string(),
+                    err,
                     footer()
                 )
                 .as_bytes(),
