@@ -2,7 +2,7 @@
 name = "stratos"
 version = "0.1.13"
 authors = ["Lennart Heinrich <lennart@ltheinrich.de>"]
-edition = "2018"
+edition = "2021"
 license = "ISC"
 repository = "https://github.com/ltheinrich/stratos"
 description = "Stratosphere balloon log analyzer"

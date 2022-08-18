@@ -23,7 +23,7 @@ impl<'a> Log<'a> {
         lines.remove(0);
 
         // split header and remove header from line list
-        let header: Vec<&str> = lines.get(0).unwrap_or(&"").split(';').collect();
+        let header: Vec<&str> = lines.first().unwrap_or(&"").split(';').collect();
         lines.remove(0);
 
         // parse data
@@ -80,7 +80,7 @@ impl<'a> Log<'a> {
                     let hms: Vec<&str> = value.split(':').collect();
                     hms.get(2).unwrap_or(&"0").parse().unwrap_or(0.) / 60.
                         + hms.get(1).unwrap_or(&"0").parse().unwrap_or(0.)
-                        + hms.get(0).unwrap_or(&"0").parse().unwrap_or(0.) * 60.
+                        + hms.first().unwrap_or(&"0").parse().unwrap_or(0.) * 60.
                 } else {
                     // unknown format
                     0.
