@@ -9,7 +9,7 @@ description = "Stratosphere balloon log analyzer"
 readme = "README.md"
 
 [dependencies]
-kern = { version = "1.4.0", features = ["http"] }
+kern = { version = "1.5.1", features = ["http"] }
 plotlib = "0.5.1"
 
 [profile.release]

@@ -1,7 +1,7 @@
 //! Log parser
 
 use crate::Xy;
-use kern::Fail;
+use kern::{Fail, Result};
 
 /// Log structure
 pub struct Log<'a> {
@@ -14,7 +14,7 @@ pub struct Log<'a> {
 
 impl<'a> Log<'a> {
     /// Parse log file to Log
-    pub fn from(log: &str) -> Result<Log, Fail> {
+    pub fn from(log: &str) -> Result<Log> {
         // split lines and remove comment line
         let mut lines: Vec<&str> = log.lines().collect();
         if lines.len() < 2 {
@@ -52,7 +52,7 @@ impl<'a> Log<'a> {
     */
 
     /// Get values for specific header key
-    pub fn at_key(&self, key: &str) -> Result<Vec<f64>, Fail> {
+    pub fn at_key(&self, key: &str) -> Result<Vec<f64>> {
         // determine index of key
         let mut index = 0;
         for (i, &header_key) in self.header.iter().enumerate() {
@@ -94,7 +94,7 @@ impl<'a> Log<'a> {
 
     /* unused
     /// Get an XY Vec of two value groups
-    pub fn get_xy(&self, key1: &str, key2: &str) -> Result<Vec<XY>, Fail> {
+    pub fn get_xy(&self, key1: &str, key2: &str) -> Result<Vec<XY>> {
         // get values for header
         let values1 = self.at_key(key1)?;
         let values2 = self.at_key(key2)?;
@@ -121,7 +121,7 @@ impl<'a> Log<'a> {
 }
 
 /// Combine into an XY Vec of two value groups
-pub fn to_xy(values1: &[f64], values2: &[f64]) -> Result<Vec<Xy>, Fail> {
+pub fn to_xy(values1: &[f64], values2: &[f64]) -> Result<Vec<Xy>> {
     // initialize vector
     let mut tuples = Vec::with_capacity(values1.len());
     for &value1 in values1 {

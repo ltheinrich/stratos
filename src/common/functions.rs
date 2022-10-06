@@ -4,7 +4,7 @@ use crate::analyze::{highest, highest_x, highest_y, lowest_x, lowest_y, set_rang
 use crate::parse::to_xy;
 use crate::Xy;
 use crate::{Log, Parameters};
-use kern::Fail;
+use kern::Result;
 use plotlib::page::Page;
 use plotlib::repr::Plot;
 use plotlib::style::PointStyle;
@@ -21,12 +21,12 @@ pub fn none_empty(opt: Option<&String>) -> Option<&String> {
 }
 
 /// Analyse log and return svg image
-pub fn draw(log: &str, params: Parameters) -> Result<String, Fail> {
+pub fn draw(log: &str, params: Parameters) -> Result<String> {
     // parse log
     let log = Log::from(log)?;
-    let x_values = log.at_key(params.x_axis).or_else(Fail::from)?;
-    let y_values = log.at_key(params.y_axis).or_else(Fail::from)?;
-    let values = to_xy(&x_values, &y_values).or_else(Fail::from)?;
+    let x_values = log.at_key(params.x_axis)?;
+    let y_values = log.at_key(params.y_axis)?;
+    let values = to_xy(&x_values, &y_values)?;
 
     // get highest and lowest
     let highest_x = highest_x(&values).1;
@@ -112,10 +112,7 @@ pub fn draw(log: &str, params: Parameters) -> Result<String, Fail> {
     }
 
     // return output
-    Ok(Page::single(&view)
-        .to_svg()
-        .or_else(Fail::from)?
-        .to_string())
+    Ok(Page::single(&view).to_svg()?.to_string())
 }
 
 /// Create plot

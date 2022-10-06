@@ -3,12 +3,12 @@
 use crate::common::*;
 use crate::parse::Log;
 use kern::http::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
-use kern::Fail;
+use kern::{Fail, Result};
 use std::collections::BTreeMap;
 use std::sync::{Arc, RwLock};
 
 // Handle HTTP request
-pub fn handle(req: Result<HttpRequest, Fail>, _: Arc<RwLock<()>>) -> Result<Vec<u8>, Fail> {
+pub fn handle(req: Result<HttpRequest>, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
     // read header
     if let Ok(req) = req {
         // match URL
@@ -145,7 +145,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
 }
 
 // Get x-axis name and y-axis name
-fn get_xy_names(post_params: &BTreeMap<String, String>) -> Result<(&str, &str), Fail> {
+fn get_xy_names(post_params: &BTreeMap<String, String>) -> Result<(&str, &str)> {
     // x-/y-axis
     let x_axis = post_params
         .get("x")
