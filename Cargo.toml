@@ -10,7 +10,7 @@ readme = "README.md"
 
 [dependencies]
 kern = { version = "1.5.1", features = ["http"] }
-plotlib = "0.5.1"
+plotlib = { git = "https://github.com/milliams/plotlib" }
 
 [profile.release]
 lto = true
