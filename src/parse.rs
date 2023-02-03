@@ -63,7 +63,7 @@ impl<'a> Log<'a> {
                 break;
             } else if i + 1 == self.header.len() {
                 // header name not found: end of list
-                return Fail::from(format!("Werte für {} existieren im Log nicht", key));
+                return Fail::from(format!("Werte für {key} existieren im Log nicht"));
             }
         }
 

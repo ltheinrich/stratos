@@ -25,7 +25,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let cmd = CliBuilder::new().options(&["log", "help"]).build(&args);
     if cmd.option("help") {
-        return println!("{}", HELP);
+        return println!("{HELP}");
     }
 
     // load file config
@@ -51,7 +51,7 @@ fn main() {
     http_settings.max_body_size = size;
 
     // listen
-    let listen_addr = format!("{}:{}", addr, port);
+    let listen_addr = format!("{addr}:{port}");
     let listeners = listen(
         &listen_addr,
         threads,
@@ -65,10 +65,10 @@ fn main() {
     // print info message
     if addr == "[::]" {
         // default message
-        println!("Öffne Stratos im Browser: https://localhost:{}", port);
+        println!("Öffne Stratos im Browser: https://localhost:{port}");
     } else {
         // more technical ;)
-        println!("Der Server läuft unter {}:{}", addr, port);
+        println!("Der Server läuft unter {addr}:{port}");
     }
 
     // legacy HTTP redirect
