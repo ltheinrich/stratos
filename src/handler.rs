@@ -21,6 +21,7 @@ pub fn handle(req: Result<HttpRequest>, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
             _ => {
                 // check if POST
                 if req.method() == &HttpMethod::Post {
+                    dbg!(&req);
                     // process POST request
                     process_request(&req)
                 } else if req.get().contains_key("options") {

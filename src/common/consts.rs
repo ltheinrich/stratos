@@ -13,7 +13,7 @@ pub const FAVICON_ICO: &[u8] = include_bytes!("../../web/favicon.ico");
 pub const FAVICON_PNG: &[u8] = include_bytes!("../../web/favicon.png");
 pub const APPLE_TOUCH_ICON: &[u8] = include_bytes!("../../web/apple-touch-icon.png");
 pub const HELP: &str = "Benutzung: stratos [OPTIONEN]\nString S, Integer I, Boolean B\n\nOptionen:
-  --port    I       Port (4490)
+  --port    I       Port (4491)
   --addr    S       IP-Adresse ([::])
   --size    I       Maximale Log-Größe in MB (10)
   --threads I       Anzahl der anfangs startenden Threads (2)";

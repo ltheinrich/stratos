@@ -34,7 +34,7 @@ fn main() {
         Config::read("/etc/stratos.conf", &mut conf_buf).unwrap_or_else(|_| Config::from(""));
 
     // configuration
-    let port = cmd.param("port", config.value("port", "4490"));
+    let port = cmd.param("port", config.value("port", "4491"));
     let addr = cmd.param("addr", config.value("addr", "[::]"));
     let threads = cmd.parameter("threads", config.get("threads", 2));
     let size = cmd.parameter("size", config.get("size", 10)) * 1_048_576;
