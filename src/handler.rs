@@ -21,8 +21,8 @@ pub fn handle(req: Result<HttpRequest>, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
             _ => {
                 // check if POST
                 if req.method() == &HttpMethod::Post {
-                    dbg!(&req);
                     // process POST request
+                    println!("post");
                     process_request(&req)
                 } else if req.get().contains_key("options") {
                     // redirect GET with ?options to /
@@ -71,6 +71,7 @@ fn process_request(http_request: &HttpRequest) -> Vec<u8> {
     // check if options page
     if http_request.get().contains_key("options") {
         // serve options page
+        println!("options");
         handle_options(&post, file)
     } else {
         // serve index page
@@ -81,6 +82,7 @@ fn process_request(http_request: &HttpRequest) -> Vec<u8> {
 // Handle options page
 fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8> {
     // get x-axis and y-axis
+    println!("xy");
     let (x_axis, y_axis) = match get_xy_names(post_params) {
         Ok((x_axis, y_axis)) => (x_axis, y_axis),
         Err(err) => {
@@ -99,6 +101,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
     };
 
     // draw analysis
+    println!("draw");
     let analysis = match draw(
         file,
         Parameters::from(
@@ -135,6 +138,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
     };
 
     // serve analysis image
+    println!("headers");
     let mut headers = BTreeMap::new();
     headers.insert(
         "content-disposition",
@@ -162,6 +166,7 @@ fn get_xy_names(post_params: &BTreeMap<String, String>) -> Result<(&str, &str)> 
 // Handle index page
 fn handle_index(file: &str) -> Vec<u8> {
     // parse log file
+    println!("log");
     let log = match Log::from(file) {
         Ok(log) => log,
         Err(err) => {
