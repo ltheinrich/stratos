@@ -4,7 +4,7 @@ use crate::common::*;
 use crate::parse::Log;
 use kern::http::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
 use kern::{Fail, Result};
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 // Handle HTTP request
@@ -80,7 +80,7 @@ fn process_request(http_request: &HttpRequest) -> Vec<u8> {
 }
 
 // Handle options page
-fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8> {
+fn handle_options(post_params: &HashMap<String, String>, file: &str) -> Vec<u8> {
     // get x-axis and y-axis
     println!("xy");
     let (x_axis, y_axis) = match get_xy_names(post_params) {
@@ -139,7 +139,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
 
     // serve analysis image
     println!("headers");
-    let mut headers = BTreeMap::new();
+    let mut headers = HashMap::new();
     headers.insert(
         "content-disposition",
         "attachment; filename=\"analysis.svg\"",
@@ -150,7 +150,7 @@ fn handle_options(post_params: &BTreeMap<String, String>, file: &str) -> Vec<u8>
 }
 
 // Get x-axis name and y-axis name
-fn get_xy_names(post_params: &BTreeMap<String, String>) -> Result<(&str, &str)> {
+fn get_xy_names(post_params: &HashMap<String, String>) -> Result<(&str, &str)> {
     // x-/y-axis
     let x_axis = post_params
         .get("x")
