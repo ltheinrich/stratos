@@ -9,7 +9,7 @@ description = "Stratosphere balloon log analyzer"
 readme = "README.md"
 
 [dependencies]
-kern = { version = "1.6.1", features = ["http"] }
+kern = { version = "1.6.2", features = ["http"] }
 plotlib = { git = "https://github.com/milliams/plotlib" }
 
 [profile.release]
