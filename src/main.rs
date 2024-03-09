@@ -7,11 +7,10 @@ mod parse;
 
 use common::*;
 use handler::handle;
-use kern::http::server::{certificate_config, listen, unsecure::listen_redirect, HttpSettings};
+use kern::http::server::{certificate_config, HttpServerBuilder, HttpSettings};
 use kern::{meta::init_version, CliBuilder, Config};
 use parse::Log;
 use std::env;
-use std::sync::{Arc, RwLock};
 
 // Main function
 fn main() {
@@ -52,15 +51,14 @@ fn main() {
 
     // listen
     let listen_addr = format!("{addr}:{port}");
-    let listeners = listen(
-        &listen_addr,
-        threads,
-        http_settings,
-        tls_config,
-        handle,
-        Arc::new(RwLock::new(())),
-    )
-    .expect("Der TCP-Server konnte nicht an der angegebenen Adresse bzw. Port starten");
+    let server = HttpServerBuilder::new()
+        .addr(listen_addr)
+        .threads(threads)
+        .settings(http_settings)
+        .tls_on(tls_config)
+        .handler(handle)
+        .build(Default::default())
+        .expect("Der TCP-Server konnte nicht an der angegebenen Adresse bzw. Port starten");
 
     // print info message
     if addr == "[::]" {
@@ -71,17 +69,5 @@ fn main() {
         println!("Der Server läuft unter {addr}:{port}");
     }
 
-    // legacy HTTP redirect
-    listen_redirect(
-        "[::]:3490",
-        listen_addr
-            .replace("[::]", "localhost")
-            .replace("0.0.0.0", "localhost"),
-    )
-    .ok();
-
-    // join threads
-    for listener in listeners {
-        listener.join().expect("Stratos ist abgestürzt");
-    }
+    server.block().unwrap();
 }

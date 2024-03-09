@@ -9,7 +9,7 @@ description = "Stratosphere balloon log analyzer"
 readme = "README.md"
 
 [dependencies]
-kern = { version = "1.7.0", features = ["http"] }
+kern = { version = "1.7.0", features = ["tls"] }
 plotlib = { git = "https://github.com/milliams/plotlib" }
 
 [profile.release]
@@ -22,13 +22,26 @@ priority = "optional"
 section = "science"
 maintainer-scripts = "deb/"
 assets = [
-    ["target/release/stratos", "usr/bin/", "755"],
-    ["deb/stratos.conf", "etc/stratos.conf", "644"],
-    ["deb/stratos.service", "etc/systemd/system/stratos.service", "644"],
-    ["README.md", "usr/share/doc/stratos/README", "644"],
+    [
+        "target/release/stratos",
+        "usr/bin/",
+        "755",
+    ],
+    [
+        "deb/stratos.conf",
+        "etc/stratos.conf",
+        "644",
+    ],
+    [
+        "deb/stratos.service",
+        "etc/systemd/system/stratos.service",
+        "644",
+    ],
+    [
+        "README.md",
+        "usr/share/doc/stratos/README",
+        "644",
+    ],
 ]
-conf-files = [
-    "/etc/stratos.conf",
-    "/etc/systemd/system/stratos.service"
-]
+conf-files = ["/etc/stratos.conf", "/etc/systemd/system/stratos.service"]
 extended-description = "Stratos analyzes the log file of stratosphere balloon flights"

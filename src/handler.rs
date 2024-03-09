@@ -8,47 +8,33 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 // Handle HTTP request
-pub fn handle(req: Result<HttpRequest>, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
-    // read header
-    if let Ok(req) = req {
-        // match URL
-        return Ok(match &req.url()[1..] {
-            "favicon.ico" => respond(FAVICON_ICO, "image/x-icon", None),
-            "favicon.png" => respond(FAVICON_PNG, "image/png", None),
-            "apple-touch-icon.png" => respond(APPLE_TOUCH_ICON, "image/png", None),
-            "bootstrap.min.css" => respond(BOOTSTRAP, "text/css", None),
-            "style.css" => respond(STYLE, "text/css", None),
-            _ => {
-                // check if POST
-                if req.method() == &HttpMethod::Post {
-                    // process POST request
-                    println!("post");
-                    process_request(&req)
-                } else if req.get().contains_key("options") {
-                    // redirect GET with ?options to /
-                    redirect("/")
-                } else {
-                    // serve index page
-                    respond(
-                        format!("{}{}{}", HEAD, INDEX.replace("%LOG_FILE%", ""), footer())
-                            .as_bytes(),
-                        "text/html",
-                        None,
-                    )
-                }
+pub fn handle(req: HttpRequest, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
+    // match URL
+    return Ok(match &req.url()[1..] {
+        "favicon.ico" => respond(FAVICON_ICO, "image/x-icon", None),
+        "favicon.png" => respond(FAVICON_PNG, "image/png", None),
+        "apple-touch-icon.png" => respond(APPLE_TOUCH_ICON, "image/png", None),
+        "bootstrap.min.css" => respond(BOOTSTRAP, "text/css", None),
+        "style.css" => respond(STYLE, "text/css", None),
+        _ => {
+            // check if POST
+            if req.method() == &HttpMethod::Post {
+                // process POST request
+                println!("post");
+                process_request(&req)
+            } else if req.get().contains_key("options") {
+                // redirect GET with ?options to /
+                redirect("/")
+            } else {
+                // serve index page
+                respond(
+                    format!("{}{}{}", HEAD, INDEX.replace("%LOG_FILE%", ""), footer()).as_bytes(),
+                    "text/html",
+                    None,
+                )
             }
-        });
-    }
-
-    // invalid HTTP request
-    Ok(respond(
-        format!(
-            "{}{}<div class=\"alert alert-danger\" role=\"alert\">Die HTTP-Anfrage konnte nicht gelesen werden</div>{}",
-            HEAD, BACK, footer()
-        ),
-        "text/html",
-        None,
-    ))
+        }
+    });
 }
 
 // Process HTTP POST request
