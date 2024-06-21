@@ -32,7 +32,7 @@ pub fn split_up(values: Vec<Xy>, highest: usize) -> (Vec<Xy>, Vec<Xy>) {
 /// Get highest value in list
 /// Returns index and value
 pub fn highest(values: &[f64]) -> (usize, f64) {
-    let mut max = (0, std::f64::MIN);
+    let mut max = (0, f64::MIN);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v > max.1 {
             max = (i, v);
@@ -58,7 +58,7 @@ pub fn lowest(values: &[f64]) -> (usize, f64) {
 /// Get highest x-value in XY-list
 /// Returns index and value
 pub fn highest_x(values: &[Xy]) -> (usize, f64) {
-    let mut max = (0, std::f64::MIN);
+    let mut max = (0, f64::MIN);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.0 > max.1 {
             max = (i, v.0);
@@ -70,7 +70,7 @@ pub fn highest_x(values: &[Xy]) -> (usize, f64) {
 /// Get lowest x-value in XY-list
 /// Returns index and value
 pub fn lowest_x(values: &[Xy]) -> (usize, f64) {
-    let mut min = (0, std::f64::MAX);
+    let mut min = (0, f64::MAX);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.0 < min.1 {
             min = (i, v.0);
@@ -82,7 +82,7 @@ pub fn lowest_x(values: &[Xy]) -> (usize, f64) {
 /// Get highest y-value in XY-list
 /// Returns index and value
 pub fn highest_y(values: &[Xy]) -> (usize, f64) {
-    let mut max = (0, std::f64::MIN);
+    let mut max = (0, f64::MIN);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.1 > max.1 {
             max = (i, v.1);
@@ -94,7 +94,7 @@ pub fn highest_y(values: &[Xy]) -> (usize, f64) {
 /// Get lowest y-value in XY-list
 /// Returns index and value
 pub fn lowest_y(values: &[Xy]) -> (usize, f64) {
-    let mut min = (0, std::f64::MAX);
+    let mut min = (0, f64::MAX);
     values.iter().enumerate().for_each(|(i, &v)| {
         if v.1 < min.1 {
             min = (i, v.1);
