@@ -293,9 +293,9 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.2.20"
+version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f12335488a2f3b0a83b14edad48dca9879ce89b2edd10e80237e4e852dd645e"
+checksum = "a909e6e8053fa1a5ad670f5816c7d93029ee1fa8898718490544a6b0d5d38b3e"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -459,9 +459,9 @@ checksum = "e72d8b19ab05827afefcca66bf47040c1e66a0901eb814784c77d4ec118bd309"
 
 [[package]]
 name = "syn"
-version = "2.0.75"
+version = "2.0.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6af063034fc1935ede7be0122941bafa9bacb949334d090b77ca98b5817c7d9"
+checksum = "578e081a14e0cefc3279b0472138c513f37b41a08d5a3cca9b6e4e8ceb6cd525"
 dependencies = [
  "proc-macro2",
  "quote",
