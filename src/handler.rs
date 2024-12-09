@@ -10,7 +10,7 @@ use std::sync::{Arc, RwLock};
 // Handle HTTP request
 pub fn handle(req: HttpRequest, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
     // match URL
-    return Ok(match &req.url()[1..] {
+    Ok(match &req.url()[1..] {
         "favicon.ico" => respond(FAVICON_ICO, "image/x-icon", None),
         "favicon.png" => respond(FAVICON_PNG, "image/png", None),
         "apple-touch-icon.png" => respond(APPLE_TOUCH_ICON, "image/png", None),
@@ -34,7 +34,7 @@ pub fn handle(req: HttpRequest, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
                 )
             }
         }
-    });
+    })
 }
 
 // Process HTTP POST request
