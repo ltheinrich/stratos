@@ -7,8 +7,8 @@ mod parse;
 
 use common::*;
 use handler::handle;
-use kern::http::server::{certificate_config, HttpServerBuilder, HttpSettings};
-use kern::{meta::init_version, CliBuilder, Config};
+use kern::http::server::{HttpServerBuilder, HttpSettings, certificate_config};
+use kern::{CliBuilder, Config, meta::init_version};
 use parse::Log;
 use rustls::ServerConfig;
 use std::env;

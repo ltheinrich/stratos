@@ -2,7 +2,7 @@
 
 use crate::common::*;
 use crate::parse::Log;
-use kern::http::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
+use kern::http::server::{HttpMethod, HttpRequest, ResponseData, redirect, respond};
 use kern::{Fail, Result};
 use std::collections::HashMap;
 
@@ -47,10 +47,15 @@ fn process_request(http_request: &HttpRequest) -> Vec<u8> {
         None => {
             // error
             return respond(
-                        format!("{}{}<div class=\"alert alert-danger\" role=\"alert\">Bitte suche eine Log-Datei aus</div>{}", HEAD, BACK, footer()),
-                        "text/html",
-                        None,
-                    );
+                format!(
+                    "{}{}<div class=\"alert alert-danger\" role=\"alert\">Bitte suche eine Log-Datei aus</div>{}",
+                    HEAD,
+                    BACK,
+                    footer()
+                ),
+                "text/html",
+                None,
+            );
         }
     };
     // check if options page
@@ -81,7 +86,7 @@ fn handle_options(post_params: &HashMap<String, String>, file: &str) -> Vec<u8> 
                 ),
                 "text/html",
                 None,
-            )
+            );
         }
     };
 

@@ -1,8 +1,8 @@
 //! General functions
 
+use crate::Xy;
 use crate::analyze::{highest, highest_x, highest_y, lowest_x, lowest_y, set_range, split_up};
 use crate::parse::to_xy;
-use crate::Xy;
 use crate::{Log, Parameters};
 use kern::Result;
 use plotlib::page::Page;

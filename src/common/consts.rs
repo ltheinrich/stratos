@@ -21,5 +21,8 @@ pub const CARGO_TOML: &str = include_str!("../../Cargo.toml");
 
 /// Get HTML footer with version
 pub fn footer() -> String {
-    format!("</div></div><div class=\"cr\"><small class=\"form-text text-muted\">Stratos v{} &copy; 2019 Lennart Heinrich</small><a href=\"https://ltheinrich.de/stratos\">Quellcode</a></div></body></html>", version())
+    format!(
+        "</div></div><div class=\"cr\"><small class=\"form-text text-muted\">Stratos v{} &copy; 2019 Lennart Heinrich</small><a href=\"https://ltheinrich.de/stratos\">Quellcode</a></div></body></html>",
+        version()
+    )
 }
