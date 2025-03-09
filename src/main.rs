@@ -7,12 +7,10 @@ mod parse;
 
 use common::*;
 use handler::handle;
-use kern::http::server::{HttpServerBuilder, HttpSettings, certificate_config};
+use kern::http::server::{HttpServerBuilder, HttpSettings, certificate_config_provider};
 use kern::{CliBuilder, Config, meta::init_version};
 use parse::Log;
-use rustls::ServerConfig;
 use std::env;
-use std::sync::Arc;
 
 // Main function
 fn main() {
@@ -42,6 +40,11 @@ fn main() {
 
     // HTTP settings
     let http_settings = HttpSettings::new().max_body_size(size).threads_num(threads);
+    let tls_config = certificate_config_provider(
+        include_bytes!("../data/cert.pem"),
+        include_bytes!("../data/key.pem"),
+    )
+    .unwrap();
 
     // listen
     let listen_addr = format!("{addr}:{port}");
@@ -63,14 +66,4 @@ fn main() {
     }
 
     server.block().unwrap();
-}
-
-fn tls_config() -> Arc<ServerConfig> {
-    Arc::new(
-        certificate_config(
-            include_bytes!("../data/cert.pem"),
-            include_bytes!("../data/key.pem"),
-        )
-        .unwrap(),
-    )
 }

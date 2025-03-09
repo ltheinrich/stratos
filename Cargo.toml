@@ -9,8 +9,7 @@ description = "Stratosphere balloon log analyzer"
 readme = "README.md"
 
 [dependencies]
-kern = { version = "1.8.1", features = ["tls"] }
-rustls = "0.23.23"
+kern = { version = "1.8.2", features = ["tls"] }
 plotlib = { git = "https://github.com/milliams/plotlib", branch = "dependabot/cargo/svg-0.13.0" }
 
 [profile.release]
