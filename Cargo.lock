@@ -272,7 +272,7 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 [[package]]
 name = "plotlib"
 version = "0.5.1"
-source = "git+https://github.com/milliams/plotlib#621251a7e809efa22bfacaccbf8575ca8c8469f4"
+source = "git+https://github.com/milliams/plotlib?branch=dependabot%2Fcargo%2Fsvg-0.13.0#23d2fbabd3d4610d118b54a2520441031bb4dbf3"
 dependencies = [
  "svg",
  "thiserror",
@@ -433,9 +433,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "svg"
-version = "0.10.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e72d8b19ab05827afefcca66bf47040c1e66a0901eb814784c77d4ec118bd309"
+checksum = "02d815ad337e8449d2374d4248448645edfe74e699343dd5719139d93fa87112"
 
 [[package]]
 name = "syn"
