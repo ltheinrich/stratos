@@ -185,13 +185,14 @@ dependencies = [
 
 [[package]]
 name = "kern"
-version = "1.7.1"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d264d60bc333b796813e95321a90e1b3c269aa94b8d8bff2a7dbe54d1663a85c"
+checksum = "b4fc94e4a76afc9a97f3a732309d561bd4b632f2051af3a28b14370a98b19014"
 dependencies = [
  "rustls",
  "rustls-pemfile",
  "rustls-pki-types",
+ "webpki-roots",
 ]
 
 [[package]]
@@ -483,6 +484,15 @@ name = "wasi"
 version = "0.11.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
+
+[[package]]
+name = "webpki-roots"
+version = "0.26.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2210b291f7ea53617fbafcc4939f10914214ec15aace5ba62293a668f322c5c9"
+dependencies = [
+ "rustls-pki-types",
+]
 
 [[package]]
 name = "which"
