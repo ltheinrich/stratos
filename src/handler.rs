@@ -5,10 +5,9 @@ use crate::parse::Log;
 use kern::http::server::{redirect, respond, HttpMethod, HttpRequest, ResponseData};
 use kern::{Fail, Result};
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
 
 // Handle HTTP request
-pub fn handle(req: HttpRequest, _: Arc<RwLock<()>>) -> Result<Vec<u8>> {
+pub fn handle(req: HttpRequest) -> Result<Vec<u8>> {
     // match URL
     Ok(match &req.url()[1..] {
         "favicon.ico" => respond(FAVICON_ICO, "image/x-icon", None),

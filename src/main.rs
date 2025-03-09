@@ -10,7 +10,9 @@ use handler::handle;
 use kern::http::server::{certificate_config, HttpServerBuilder, HttpSettings};
 use kern::{meta::init_version, CliBuilder, Config};
 use parse::Log;
+use rustls::ServerConfig;
 use std::env;
+use std::sync::Arc;
 
 // Main function
 fn main() {
@@ -38,26 +40,17 @@ fn main() {
     let threads = cmd.parameter("threads", config.get("threads", 2));
     let size = cmd.parameter("size", config.get("size", 10)) * 1_048_576;
 
-    // load tls config
-    let tls_config = certificate_config(
-        include_bytes!("../data/cert.pem"),
-        include_bytes!("../data/key.pem"),
-    )
-    .unwrap();
-
     // HTTP settings
-    let mut http_settings = HttpSettings::new();
-    http_settings.max_body_size = size;
+    let http_settings = HttpSettings::new().max_body_size(size).threads_num(threads);
 
     // listen
     let listen_addr = format!("{addr}:{port}");
     let server = HttpServerBuilder::new()
         .addr(listen_addr)
-        .threads(threads)
         .settings(http_settings)
         .tls_on(tls_config)
         .handler(handle)
-        .build(Default::default())
+        .build()
         .expect("Der TCP-Server konnte nicht an der angegebenen Adresse bzw. Port starten");
 
     // print info message
@@ -70,4 +63,14 @@ fn main() {
     }
 
     server.block().unwrap();
+}
+
+fn tls_config() -> Arc<ServerConfig> {
+    Arc::new(
+        certificate_config(
+            include_bytes!("../data/cert.pem"),
+            include_bytes!("../data/key.pem"),
+        )
+        .unwrap(),
+    )
 }
