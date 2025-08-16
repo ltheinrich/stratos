@@ -112,31 +112,31 @@ pub fn set_range(
     y_max: Option<&String>,
 ) -> Vec<Xy> {
     // set x-min
-    if let Some(x_min) = x_min {
-        if let Ok(x_min) = x_min.parse() {
-            values = remove_lower_x(values, x_min);
-        }
+    if let Some(x_min) = x_min
+        && let Ok(x_min) = x_min.parse()
+    {
+        values = remove_lower_x(values, x_min);
     }
 
     // set x-max
-    if let Some(x_max) = x_max {
-        if let Ok(x_max) = x_max.parse() {
-            values = remove_higher_x(values, x_max);
-        }
+    if let Some(x_max) = x_max
+        && let Ok(x_max) = x_max.parse()
+    {
+        values = remove_higher_x(values, x_max);
     }
 
     // set y-min
-    if let Some(y_min) = y_min {
-        if let Ok(y_min) = y_min.parse() {
-            values = remove_lower_y(values, y_min);
-        }
+    if let Some(y_min) = y_min
+        && let Ok(y_min) = y_min.parse()
+    {
+        values = remove_lower_y(values, y_min);
     }
 
     // set y-max
-    if let Some(y_max) = y_max {
-        if let Ok(y_max) = y_max.parse() {
-            values = remove_higher_y(values, y_max);
-        }
+    if let Some(y_max) = y_max
+        && let Ok(y_max) = y_max.parse()
+    {
+        values = remove_higher_y(values, y_max);
     }
 
     // return values

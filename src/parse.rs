@@ -14,7 +14,7 @@ pub struct Log<'a> {
 
 impl<'a> Log<'a> {
     /// Parse log file to Log
-    pub fn from(log: &str) -> Result<Log> {
+    pub fn from(log: &str) -> Result<Log<'_>> {
         // split lines and remove comment line
         let mut lines: Vec<&str> = log.lines().collect();
         if lines.len() < 2 {

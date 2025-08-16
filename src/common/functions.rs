@@ -12,10 +12,10 @@ use plotlib::view::ContinuousView;
 
 /// None instead of ""
 pub fn none_empty(opt: Option<&String>) -> Option<&String> {
-    if let Some(value) = opt {
-        if value.is_empty() {
-            return None;
-        }
+    if let Some(value) = opt
+        && value.is_empty()
+    {
+        return None;
     }
     opt
 }
@@ -82,33 +82,33 @@ pub fn draw(log: &str, params: Parameters) -> Result<String> {
     view = view.add(fall_plot);
 
     // set x-range
-    if let (Some(x_min), Some(x_max)) = (params.x_min, params.x_max) {
-        if let (Ok(x_min), Ok(x_max)) = (x_min.parse(), x_max.parse()) {
-            view = view.x_range(x_min, x_max);
-        }
-    } else if let Some(x_min) = params.x_min {
-        if let Ok(x_min) = x_min.parse() {
-            view = view.x_range(x_min, highest_x);
-        }
-    } else if let Some(x_max) = params.x_max {
-        if let Ok(x_max) = x_max.parse() {
-            view = view.x_range(lowest_x, x_max);
-        }
+    if let (Some(x_min), Some(x_max)) = (params.x_min, params.x_max)
+        && let (Ok(x_min), Ok(x_max)) = (x_min.parse(), x_max.parse())
+    {
+        view = view.x_range(x_min, x_max);
+    } else if let Some(x_min) = params.x_min
+        && let Ok(x_min) = x_min.parse()
+    {
+        view = view.x_range(x_min, highest_x);
+    } else if let Some(x_max) = params.x_max
+        && let Ok(x_max) = x_max.parse()
+    {
+        view = view.x_range(lowest_x, x_max);
     }
 
     // set y-range
-    if let (Some(y_min), Some(y_max)) = (params.y_min, params.y_max) {
-        if let (Ok(y_min), Ok(y_max)) = (y_min.parse(), y_max.parse()) {
-            view = view.y_range(y_min, y_max);
-        }
-    } else if let Some(y_min) = params.y_min {
-        if let Ok(y_min) = y_min.parse() {
-            view = view.y_range(y_min, highest_y);
-        }
-    } else if let Some(y_max) = params.y_max {
-        if let Ok(y_max) = y_max.parse() {
-            view = view.y_range(lowest_y, y_max);
-        }
+    if let (Some(y_min), Some(y_max)) = (params.y_min, params.y_max)
+        && let (Ok(y_min), Ok(y_max)) = (y_min.parse(), y_max.parse())
+    {
+        view = view.y_range(y_min, y_max);
+    } else if let Some(y_min) = params.y_min
+        && let Ok(y_min) = y_min.parse()
+    {
+        view = view.y_range(y_min, highest_y);
+    } else if let Some(y_max) = params.y_max
+        && let Ok(y_max) = y_max.parse()
+    {
+        view = view.y_range(lowest_y, y_max);
     }
 
     // return output
